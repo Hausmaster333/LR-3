@@ -75,7 +75,7 @@ const T& ArraySequence<T>::get_last() const {
 
 template <class T>
 const T& ArraySequence<T>::get(int index) const {
-    if (index < 0 || index >= count) throw std::out_of_range("Sequence is empty");
+    if (index < 0 || index >= count) throw std::out_of_range("Index out of range");
 
     return array->get(index);
 }

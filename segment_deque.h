@@ -4,29 +4,32 @@
 #include "sequence.h"
 #include <stdexcept>
 
-static const int SEGMENT_SIZE = 8;
-
 template <class T>
 class SegmentDeque: public Sequence<T> {
     protected:
-        DynamicArray<T*>* block_map;
+        DynamicArray<T*>* block_map; // Динамический массив указателей на T
         int map_capacity;
         int front_block;
         int front_index;
         int back_block;
         int back_index;
         int count;
+        static const int segment_size = 8;
 
         T* allocate_block();
         void grow_map_front();
         void grow_map_back();
 
-        void resolve_index(int index, int& block, int& offset) const;
+        void resolve_index(int index, int& block, int& offset) const; // Из index получает пару block + offset(смещение внутри block)
     public:
-
         SegmentDeque();
         SegmentDeque(const T* items, int count);
         SegmentDeque(const SegmentDeque<T>& other);
+
+        void push_front(const T& item);
+        void push_back(const T& item);
+        T pop_front();
+        T pop_back();
 
         virtual SegmentDeque<T>* Instance() = 0;
         virtual SegmentDeque<T>* EmptyClone() = 0;
@@ -53,11 +56,6 @@ class SegmentDeque: public Sequence<T> {
         Sequence<T>* map(T (*func)(const T& elem)) override;
         Sequence<T>* where(bool (*predicate)(const T& elem)) override;
         T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
-
-        void push_front(const T& elem);
-        void push_back(const T& elem);
-        T pop_front();
-        T pop_back();
 
         void sort(bool (*compare)(const T& a, const T& b) = nullptr);
         SegmentDeque<T>* merge(const SegmentDeque<T>* other, bool (*compare)(const T& a, const T& b) = nullptr);
