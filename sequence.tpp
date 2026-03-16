@@ -113,19 +113,16 @@ Sequence<T>* ArraySequence<T>::get_sub_sequence(int start, int end) {
 
     if (start < 0 || end < 0 || start >= count || end >= count || start > end) throw std::out_of_range("Index out of range");
 
+    ArraySequence<T>* sub_array = EmptyClone();
+
     int new_count = end - start + 1;
-    T* items = new T[new_count];
+    sub_array->array->resize(new_count) ;
 
     for (int i = 0; i < new_count; i++) {
-        items[i] = array->get(start + i);
+        T curr_elem = array->get(start + i);
+        sub_array->array->set(i, curr_elem);
     }
-
-    ArraySequence<T>* sub_array = EmptyClone();
-    delete sub_array->array;
-    sub_array->array = new DynamicArray<T>(items, new_count);
     sub_array->count = new_count;
-
-    delete[] items;
 
     return sub_array;
 }

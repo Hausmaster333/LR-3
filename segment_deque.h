@@ -34,7 +34,7 @@ class SegmentDeque: public Sequence<T> {
         virtual SegmentDeque<T>* Instance() = 0;
         virtual SegmentDeque<T>* EmptyClone() = 0;
 
-        SegmentDeque<T>& operator=(const SegmentDeque<T>& other);
+        // SegmentDeque<T>& operator=(const SegmentDeque<T>& other);
 
         const T& get_first() const override;
         const T& get_last() const override;
@@ -46,11 +46,11 @@ class SegmentDeque: public Sequence<T> {
 
         int get_count() const override;
 
-        Sequence<T>* get_sub_sequence(const T& item) override;
+        Sequence<T>* get_sub_sequence(int start, int end) override;
         
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
-        Sequence<T>* insert_at(const T& item, int index) const;
+        Sequence<T>* insert_at(const T& item, int index) override;
         
         Sequence<T>* concat(const Sequence<T>* other) override;
         Sequence<T>* map(T (*func)(const T& elem)) override;

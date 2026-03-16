@@ -111,7 +111,7 @@ void SegmentDeque<T>::push_front(const T& item) {
 
 template <class T>
 T SegmentDeque<T>::pop_back() {
-    if (count == 0) throw std::out_of_range("Deck is empty");
+    if (count == 0) throw std::out_of_range("Deque is empty");
 
     back_index--;
 
@@ -130,7 +130,7 @@ T SegmentDeque<T>::pop_back() {
 
 template <class T>
 T SegmentDeque<T>::pop_front() {;
-    if (count == 0) throw std::out_of_range("Deck is empty");
+    if (count == 0) throw std::out_of_range("Deque is empty");
 
     T* curr_block = block_map->get(front_block);
     T curr_elem = curr_block[front_index];
@@ -149,7 +149,7 @@ T SegmentDeque<T>::pop_front() {;
 
 template <class T>
 const T& SegmentDeque<T>::get_first() const {
-    if (count == 0) throw std::out_of_range("Deck is empty");
+    if (count == 0) throw std::out_of_range("Deque is empty");
 
     T* curr_block = block_map->get(front_block);
 
@@ -158,7 +158,7 @@ const T& SegmentDeque<T>::get_first() const {
 
 template <class T>
 const T& SegmentDeque<T>::get_last() const {
-    if (count == 0) throw std::out_of_range("Deck is empty");
+    if (count == 0) throw std::out_of_range("Deque is empty");
     
     int curr_block_index, offset;
     resolve_index(count - 1, curr_block_index, offset); // Получаем положение последнего элементам дека
@@ -218,3 +218,68 @@ int SegmentDeque<T>::get_count() const {
     return count;
 }
 
+template <class T>
+Sequence<T>* SegmentDeque<T>::get_sub_sequence(int start, int end) {
+    if (count == 0) throw std::out_of_range("Deque is empty\n");
+
+    if (start < 0 || end < 0 || start >= count || end >= count || start > end) throw std::out_of_range("Index out of range");
+
+    SegmentDeque<T>* sub = EmptyClone();
+    
+    for (int i = start; i <= end; i++) {
+        sub->push_back(get(i));
+    }
+
+    return sub;
+}
+
+template <class T>
+Sequence<T>* SegmentDeque<T>::append(const T& item) {
+    SegmentDeque<T>* inst = Instance();
+
+    inst->push_back(item);
+
+    return inst;
+}
+
+template <class T>
+Sequence<T>* SegmentDeque<T>::prepend(const T& item) {
+    SegmentDeque<T>* inst = Instance();
+
+    inst->push_front(item);
+
+    return inst;
+}
+
+template <class T>
+Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int index) {
+    SegmentDeque<T>* inst = Instance();
+
+    if (index < 0 || index > inst->count) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    inst->push_back(get(count - 1)); // Добавляем пустой элемент в конец через T() либо копируем последний, для своих классов нужен конструктор по умолчанию
+
+    int curr_block_index, offset;
+    resolve_index(index, curr_block_index, offset);
+    
+    T* curr_block = inst->block_map->get(curr_block_index);
+
+    for (int i = count - 1; i > index; i--) {
+        int write_block, write_offset; // Куда пишем
+        resolve_index(i, write_block, write_offset);
+
+        int read_block, read_offset; // Откуда пишем
+        resolve_index(i - 1, read_block, read_offset);
+
+        T* curr_write_block = inst->block_map->get(write_block);
+        T* curr_read_block = inst->block_map->get(read_block);
+
+        curr_write_block[write_offset] = curr_read_block[read_offset];                              
+    }
+
+    curr_block[offset] = item;
+
+    return inst;
+}
