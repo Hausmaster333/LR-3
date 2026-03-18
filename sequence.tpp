@@ -191,7 +191,7 @@ Sequence<T>* ArraySequence<T>::insert_at(const T& item, int index) {
 template <class T>
 Sequence<T>* ArraySequence<T>::concat(const Sequence<T>* other) {
     if (other == nullptr) {
-        throw std::invalid_argument("Cannot concat with nullptr\n");
+        throw std::invalid_argument("Cannot concat with nullptr");
     }
 
     ArraySequence<T>* concat_arr = EmptyClone();

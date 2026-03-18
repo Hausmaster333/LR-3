@@ -6,6 +6,12 @@
 
 template <class T>
 class SegmentDeque: public Sequence<T> {
+    private:
+        void sys_push_front(const T& item); // Всегда меняют this вне зависимости от Mutable/Immutable
+        void sys_push_back(const T& item);
+
+        T sys_pop_front(); 
+        T sys_pop_back();
     protected:
         DynamicArray<T*>* block_map; // Динамический массив указателей на T
         int map_capacity;
@@ -20,21 +26,21 @@ class SegmentDeque: public Sequence<T> {
         void grow_map_front();
         void grow_map_back();
 
-        void resolve_index(int index, int& block, int& offset) const; // Из index получает пару block + offset(смещение внутри block)
+        void resolve_index(int index, int* block, int* offset) const; // Из index получает пару block + offset(смещение внутри block)    
     public:
         SegmentDeque();
         SegmentDeque(const T* items, int count);
         SegmentDeque(const SegmentDeque<T>& other);
 
-        void push_front(const T& item);
-        void push_back(const T& item);
-        T pop_front();
-        T pop_back();
+        SegmentDeque<T>* push_front(const T& item);
+        SegmentDeque<T>* push_back(const T& item);
+        SegmentDeque<T>* pop_front(T* result);
+        SegmentDeque<T>* pop_back(T* result);
 
         virtual SegmentDeque<T>* Instance() = 0;
         virtual SegmentDeque<T>* EmptyClone() = 0;
 
-        // SegmentDeque<T>& operator=(const SegmentDeque<T>& other);
+        SegmentDeque<T>& operator=(const SegmentDeque<T>& other);
 
         const T& get_first() const override;
         const T& get_last() const override;
