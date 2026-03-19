@@ -1,6 +1,9 @@
 #include "menu.h"
 #include "sequence.h"
 #include "bit_sequence.h"
+#include "segment_deque.h"
+#include "complex.h"
+#include "person_types.h"
 #include "utils.h"
 #include <iostream>
 #include <cstdlib>

@@ -2,7 +2,6 @@
 #define SEGMENT_DEQUE_H
 
 #include "sequence.h"
-#include <stdexcept>
 
 template <class T>
 class SegmentDeque: public Sequence<T> {
@@ -63,8 +62,8 @@ class SegmentDeque: public Sequence<T> {
         Sequence<T>* where(bool (*predicate)(const T& elem)) override;
         T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
 
+        SegmentDeque<T>* merge(const SegmentDeque<T>* other, bool (*compare)(const T& a, const T& b) = nullptr); // Если nullptr, то сортируем через <
         void sort(bool (*compare)(const T& a, const T& b) = nullptr);
-        SegmentDeque<T>* merge(const SegmentDeque<T>* other, bool (*compare)(const T& a, const T& b) = nullptr);
         int find_sub_sequence(const Sequence<T>* sub_seq) const;
 
         class Enumerator: public IEnumerator<T> {

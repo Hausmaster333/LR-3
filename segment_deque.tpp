@@ -336,21 +336,21 @@ Sequence<T>* SegmentDeque<T>::prepend(const T& item) {
 }
 
 template <class T>
-Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int index) {
+Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int target_index) {
     SegmentDeque<T>* inst = Instance();
 
-    if (index < 0 || index > inst->count) {
+    if (target_index < 0 || target_index > inst->count) {
         throw std::out_of_range("Index out of range");
     }
 
     inst->push_back(get(count - 1)); // Добавляем пустой элемент в конец через T() либо копируем последний, для своих классов нужен конструктор по умолчанию
 
     int curr_block_index, offset;
-    resolve_index(index, &curr_block_index, &offset);
+    resolve_index(target_index, &curr_block_index, &offset);
     
     T* curr_block = inst->block_map->get(curr_block_index);
 
-    for (int index = count - 1; index > index; index--) {
+    for (int index = count - 1; index > target_index; index--) {
         int write_block, write_offset; // Куда пишем
         resolve_index(index, &write_block, &write_offset);
 
@@ -428,6 +428,100 @@ T SegmentDeque<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), 
     }
 
     return reduced_elem;
+}
+
+template <class T>
+void SegmentDeque<T>::sort(bool (*compare)(const T& a, const T& b)) {
+    if (count <= 1) return;
+
+    Sequence<T>* left_seq = get_sub_sequence(0, count / 2 - 1);
+    Sequence<T>* right_seq = get_sub_sequence(count / 2, count - 1);
+
+    SegmentDeque<T>* left_deque = dynamic_cast<SegmentDeque<T>*>(left_seq);
+    SegmentDeque<T>* right_deque = dynamic_cast<SegmentDeque<T>*>(right_seq);
+
+    left_deque->sort(compare);
+    right_deque->sort(compare);
+
+    SegmentDeque<T>* merged = left_deque->merge(right_deque, compare);
+
+    while (count > 0) sys_pop_back();
+
+    for (int index = 0; index < merged->get_count(); index++) {
+        this->sys_push_back(merged->get(index));
+    }
+
+    delete left_deque;
+    delete right_deque;
+    delete merged;
+}
+
+template <class T>
+SegmentDeque<T>* SegmentDeque<T>::merge(const SegmentDeque<T>* other, bool (*compare)(const T& a, const T& b)) {
+    SegmentDeque<T>* merge_res = EmptyClone();
+
+    int this_idx = 0;
+    int other_idx = 0;
+
+    while (this_idx < count && other_idx < other->get_count()) {
+        T this_elem = get(this_idx);
+        T other_elem = other->get(other_idx);
+        
+        if (compare == nullptr) {
+            if (this_elem < other_elem) {
+                merge_res->sys_push_back(this_elem);
+                this_idx++;
+            } else {
+                merge_res->sys_push_back(other_elem);
+                other_idx++;
+            }
+        } else {
+            if (compare(this_elem, other_elem)) {
+                merge_res->sys_push_back(this_elem);
+                this_idx++;
+            } else {
+                merge_res->sys_push_back(other_elem);
+                other_idx++;
+            }
+        }       
+    }
+    // Дописываем остатки, если какой-то из деков закончился раньше
+    while (this_idx < count) { 
+        merge_res->sys_push_back(get(this_idx));
+        this_idx++;
+    }
+
+    while (other_idx < other->get_count()) {
+        merge_res->sys_push_back(other->get(other_idx));
+        other_idx++;
+    }
+
+    return merge_res;
+}
+
+template <class T>
+int SegmentDeque<T>::find_sub_sequence(const Sequence<T>* sub) const {
+    int first_idx;
+
+    for (int this_idx = 0; this_idx < count; this_idx++) {
+        first_idx = this_idx;
+
+        if (this_idx + sub->get_count() > count) {
+            break;
+        }
+
+        bool found = true;
+        for (int sub_idx = 0; sub_idx < sub->get_count(); sub_idx++) {
+            if (get(this_idx + sub_idx) != sub->get(sub_idx)) {
+                found = false;
+                break;
+            }
+        }
+        
+        if (found) return first_idx;
+    }
+
+    return -1;
 }
 
 template <class T>
