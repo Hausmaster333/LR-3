@@ -8,6 +8,7 @@ struct Person_ID {
     int number;
 
     bool operator==(const Person_ID& other) const { return (series == other.series && number == other.number); }
+    bool operator!=(const Person_ID& other) const { return !(*this == other); }
     bool operator<(const Person_ID& other) const {
         if (series == other.series) {
             return number < other.number;
@@ -70,6 +71,7 @@ class Person {
         }
 
         bool operator==(const Person& other) const { return id == other.id; }
+        bool operator!=(const Person& other) const { return !(*this == other); }         
         bool operator<(const Person& other) const { return id < other.id; }
         bool operator>(const Person& other) const { return id > other.id; }
         Person& operator=(const Person& other) {

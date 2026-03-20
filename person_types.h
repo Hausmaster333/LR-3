@@ -27,6 +27,21 @@ class Student: public Person {
         int get_grade_book_num() const { return grade_book_num; }
         char* get_group_id() const { return group_id; }
 
+        Student& operator=(const Student& other) {
+            if (this == &other) return *this;
+
+            Person::operator=(other);
+
+            delete[] group_id;
+
+            grade_book_num = other.grade_book_num;
+
+            this->group_id = new char[strlen(other.group_id) + 1];
+            strcpy(this->group_id, other.group_id);
+
+            return *this;
+        }
+
         ~Student() {
             delete[] group_id;
         }
@@ -54,6 +69,21 @@ class Teacher: public Person {
 
         int get_depart_num() const { return depart_num; }
         char* get_position() const { return position; }
+
+        Teacher& operator=(const Teacher& other) {
+            if (this == &other) return *this;
+
+            Person::operator=(other);
+
+            delete[] position;
+
+            depart_num = other.depart_num;
+
+            this->position = new char[strlen(other.position) + 1];
+            strcpy(this->position, other.position);
+
+            return *this;
+        }
 
         ~Teacher() {
             delete[] position;
