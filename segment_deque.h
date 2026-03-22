@@ -19,8 +19,8 @@ class SegmentDeque: public Sequence<T> {
         int back_block;
         int back_index;
         int count;
-        static const int segment_size = 8;
-
+        static const int segment_size = 8; // static - одно значение на класс, а не на объект. const - нельзя изменить
+        
         T* allocate_block();
         void grow_map_front();
         void grow_map_back();

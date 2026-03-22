@@ -55,10 +55,11 @@ class Person {
         }
 
         Person_ID get_id() const { return id; }
-        char* get_first_name() const { return first_name; }
-        char* get_middle_name() const { return middle_name; }
-        char* get_last_name() const { return last_name; }
-        char* get_full_name() const {  // Нужен delete[] после вызова
+        
+        const char* get_first_name() const { return first_name; }
+        const char* get_middle_name() const { return middle_name; }
+        const char* get_last_name() const { return last_name; }
+        const char* get_full_name() const {  // Нужен delete[] после вызова
             char* full_name = new char[strlen(first_name) + strlen(middle_name) + strlen(last_name) + 3];
 
             strcpy(full_name, first_name);

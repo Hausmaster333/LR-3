@@ -25,7 +25,7 @@ class Student: public Person {
         }
 
         int get_grade_book_num() const { return grade_book_num; }
-        char* get_group_id() const { return group_id; }
+        const char* get_group_id() const { return group_id; }
 
         Student& operator=(const Student& other) {
             if (this == &other) return *this;
@@ -68,7 +68,7 @@ class Teacher: public Person {
         }
 
         int get_depart_num() const { return depart_num; }
-        char* get_position() const { return position; }
+        const char* get_position() const { return position; }
 
         Teacher& operator=(const Teacher& other) {
             if (this == &other) return *this;
