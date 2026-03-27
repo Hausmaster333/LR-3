@@ -1,7 +1,7 @@
 #ifndef SEGMENT_DEQUE_H
 #define SEGMENT_DEQUE_H
 
-#include "sequence.h"
+#include "core/sequence.h"
 
 template <class T>
 class SegmentDeque: public Sequence<T> {
@@ -12,7 +12,7 @@ class SegmentDeque: public Sequence<T> {
         T sys_pop_front(); 
         T sys_pop_back();
     protected:
-        DynamicArray<T*>* block_map; // Динамический массив указателей на T
+        DynamicArray<T*> block_map; // Динамический массив указателей на T
         int map_capacity;
         int front_block;
         int front_index;

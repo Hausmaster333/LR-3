@@ -1,4 +1,4 @@
-#include "dynamic_array.h"
+#include "core/dynamic_array.h"
 #include <stdexcept>
 
 template <class T>

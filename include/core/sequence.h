@@ -1,9 +1,9 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
-#include "dynamic_array.h"
-#include "linked_list.h"
-#include "option.h"
+#include "core/dynamic_array.h"
+#include "core/linked_list.h"
+#include "core/option.h"
 
 template <class T>
 class Sequence {
@@ -39,7 +39,7 @@ class Sequence {
 template <class T>
 class ArraySequence : public Sequence<T> {
     protected:    
-        DynamicArray<T>* array;
+        DynamicArray<T> array;
         int count;
     public:
         ArraySequence();
@@ -73,18 +73,16 @@ class ArraySequence : public Sequence<T> {
         // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
 
         IEnumerator<T>* get_enumerator() const override {
-            return array->get_enumerator();
+            return array.get_enumerator();
         }
 
-        ~ArraySequence() override {
-            delete array;
-        }
+        ~ArraySequence() override {}
 };
 
 template <class T>
 class ListSequence : public Sequence<T> {
     protected:    
-        LinkedList<T>* list;
+        LinkedList<T> list;
     public:
         ListSequence();
         ListSequence(const T* items, int count);
@@ -117,12 +115,10 @@ class ListSequence : public Sequence<T> {
         // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
 
         IEnumerator<T>* get_enumerator() const override {
-            return list->get_enumerator();
+            return list.get_enumerator();
         }
 
-        ~ListSequence() override {
-            delete list;
-        }
+        ~ListSequence() override {}
 };
 
 template <class T>

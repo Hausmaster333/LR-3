@@ -1,8 +1,8 @@
 #ifndef HANOI_H
 #define HANOI_H
 
-#include "hanoi_ring.h"
-#include "segment_deque.h"
+#include "hanoi/hanoi_ring.h"
+#include "deque/segment_deque.h"
 
 struct HanoiMove {
     int from_stick_index;

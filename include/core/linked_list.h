@@ -1,7 +1,7 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
-#include "ienumerator.h"
+#include "core/ienumerator.h"
 
 template <class T>
 class LinkedList {

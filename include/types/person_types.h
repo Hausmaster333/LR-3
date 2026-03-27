@@ -1,8 +1,7 @@
 #ifndef PERSONS_H
 #define PERSONS_H
 
-#include "person.h"
-#include <cstring>
+#include "types/person.h"
 
 class Student: public Person {
     private:

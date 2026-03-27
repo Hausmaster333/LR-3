@@ -1,11 +1,9 @@
 #ifndef HANOI_VIS_H
 #define HANOI_VIS_H
 
-#include "segment_deque.h"
-#include "hanoi.h"
+#include "hanoi/hanoi.h"
 #include <fstream>
 #include <cstdlib>
-#include <cstring>
 
 // Генерирует HTML файл с визуализацией Ханойской башни и открывает в браузере
 static void generate_hanoi_html(MutableSegmentedDeque<HanoiMove>& moves,
@@ -91,38 +89,52 @@ var sticks = [[],[],[]];
 var currentStep = -1;
 var autoInterval = null;
 
-// Начальное состояние: кольца отсортированы, большие внизу
-initialRings.sort(function(a,b){return b.size - a.size;});
+// Сортируем кольца по убыванию размера — большие первыми (они будут внизу)
+initialRings.sort(function(a,b){ return b.size - a.size; });
+
+// Кладём все кольца на начальный стержень
 for(var i=0; i<initialRings.length; i++) {
     sticks[startStick].push(initialRings[i]);
 }
 
 function ringWidth(size) {
-    var minW = 40, maxW = 180;
+    var minW = 40, maxW = 180;       
     if(maxSize <= 1) return maxW;
+    
+    // Линейная интерполяция: size=1 → 40px, size=maxSize → 180px
+    // Чем больше кольцо, тем шире
     return minW + (size - 1) * (maxW - minW) / (maxSize - 1);
 }
 
 function render() {
     for(var s=0; s<3; s++) {
-        var el = document.getElementById('stick' + s);
-        // Удаляем кольца, оставляем pole
+        var el = document.getElementById('stick' + s);  // находим div стержня
+        
+        // Удаляем все кольца, оставляем только pole
         var rings = el.querySelectorAll('.ring');
         for(var r=0; r<rings.length; r++) rings[r].remove();
-        // Добавляем кольца снизу вверх
+        
+        // sticks[s][0] = нижнее кольцо, sticks[s][last] = верхнее
+        // Рисуем с последнего к первому, чтобы нижнее оказалось внизу
         for(var i=sticks[s].length-1; i>=0; i--) {
             var ring = sticks[s][i];
-            var div = document.createElement('div');
+            var div = document.createElement('div'); 
             div.className = 'ring';
-            div.style.width = ringWidth(ring.size) + 'px';
+            div.style.width = ringWidth(ring.size) + 'px'; 
             div.style.background = ring.color;
             div.textContent = ring.size;
-            // Вставляем перед pole (чтобы кольца были поверх)
+            
+            // insertBefore — вставляем div перед pole, так кольца окажутся визуально перед палкой
+            // Так кольца окажутся визуально перед палкой
             el.insertBefore(div, el.querySelector('.pole'));
         }
     }
+    
+    // Счетчик шагов
     document.getElementById('counter').textContent = 
         'Step ' + (currentStep+1) + ' / ' + moves.length;
+    
+    // Блокируем кнопки если дошли до края
     document.getElementById('prevBtn').disabled = (currentStep < 0);
     document.getElementById('nextBtn').disabled = (currentStep >= moves.length - 1);
 }
@@ -131,22 +143,28 @@ function nextStep() {
     if(currentStep >= moves.length - 1) return;
     currentStep++;
     var m = moves[currentStep];
-    // Снимаем верхнее кольцо с from
-    var ring = sticks[m.from].pop();
-    // Кладём на to
-    sticks[m.to].push(ring);
+    
+    var ring = sticks[m.from].pop();   // Снимаем последний элемент
+    sticks[m.to].push(ring);           // Кладем на другой
+    
+    // Информация о коде
     document.getElementById('info').textContent = 
         'Ring ' + m.size + ' (' + m.color + '): stick ' + m.from + ' -> stick ' + m.to;
+    
     render();
 }
 
 function prevStep() {
     if(currentStep < 0) return;
     var m = moves[currentStep];
-    // Отменяем: снимаем с to, кладём на from
+    
+    // Снимаем кольцо с to, возвращаем на from
     var ring = sticks[m.to].pop();
     sticks[m.from].push(ring);
+    
     currentStep--;
+    
+    // Показываем информацию о предыдущем ходе (или начальное сообщение)
     if(currentStep >= 0) {
         var pm = moves[currentStep];
         document.getElementById('info').textContent = 
@@ -154,32 +172,52 @@ function prevStep() {
     } else {
         document.getElementById('info').textContent = 'Press Start or Next Step';
     }
+    
     render();
 }
 
 function autoPlay() {
-    if(autoInterval) { clearInterval(autoInterval); autoInterval=null; 
-        document.getElementById('autoBtn').textContent='Auto Play'; return; }
+    if(autoInterval) { 
+        clearInterval(autoInterval);  // Останавливаем таймер
+        autoInterval = null; 
+        document.getElementById('autoBtn').textContent = 'Auto Play'; 
+        return; 
+    }
+    
+    // Запускаем автоплей
     document.getElementById('autoBtn').textContent = 'Pause';
+    
+    // setInterval — вызывает функцию каждые 600мс
     autoInterval = setInterval(function(){
+        // Если дошли до конца — останавливаемся
         if(currentStep >= moves.length - 1) {
-            clearInterval(autoInterval); autoInterval=null;
-            document.getElementById('autoBtn').textContent='Auto Play';
+            clearInterval(autoInterval); // Убиваем таймер
+            autoInterval = null;
+            document.getElementById('autoBtn').textContent = 'Auto Play';
             return;
         }
         nextStep();
     }, 600);
 }
 
+
 function resetAll() {
-    if(autoInterval) { clearInterval(autoInterval); autoInterval=null; }
+    // Если автоплей работает — останавливаем
+    if(autoInterval) { clearInterval(autoInterval); autoInterval = null; }
     document.getElementById('autoBtn').textContent = 'Auto Play';
+    
     sticks = [[],[],[]];
     currentStep = -1;
-    initialRings.sort(function(a,b){return b.size - a.size;});
-    for(var i=0;i<initialRings.length;i++) sticks[startStick].push(initialRings[i]);
+    
+    // Заново сортируем кольца (большие первыми = внизу)
+    initialRings.sort(function(a,b){ return b.size - a.size; });
+    
+    // Кладём все кольца обратно на начальный стержень
+    for(var i = 0; i < initialRings.length; i++) 
+        sticks[startStick].push(initialRings[i]);
+    
     document.getElementById('info').textContent = 'Press Start or Next Step';
-    render();
+    render(); // Перерисовываем
 }
 
 render();

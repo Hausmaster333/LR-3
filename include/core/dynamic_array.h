@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include "ienumerator.h"
+#include "core/ienumerator.h"
 
 template <class T>
 class DynamicArray {

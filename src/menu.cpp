@@ -1,9 +1,9 @@
 #include "menu.h"
-#include "sequence.h"
-#include "segment_deque.h"
-#include "complex.h"
-#include "person_types.h"
-#include "hanoi.h"
+#include "core/sequence.h"
+#include "deque/segment_deque.h"
+#include "types/complex.h"
+#include "types/person_types.h"
+#include "hanoi/hanoi.h"
 #include <iostream>
 #include <string>
 #include <chrono>

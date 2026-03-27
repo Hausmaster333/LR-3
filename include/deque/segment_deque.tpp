@@ -1,4 +1,4 @@
-#include "segment_deque.h"
+#include "deque/segment_deque.h"
 #include <stdexcept>
 
 template <class T>
@@ -13,12 +13,12 @@ void SegmentDeque<T>::sys_push_front(const T& item) {
             grow_map_front();
         }
 
-        if (block_map->get(front_block) == nullptr) {
-            block_map->set(front_block, allocate_block());
+        if (block_map.get(front_block) == nullptr) {
+            block_map.set(front_block, allocate_block());
         }
     }  
 
-    T* curr_block = block_map->get(front_block);
+    T* curr_block = block_map.get(front_block);
     curr_block[front_index] = item;
 
     count++;
@@ -35,7 +35,7 @@ T SegmentDeque<T>::sys_pop_back() {
         back_index = segment_size - 1;
     }
 
-    T* curr_block = block_map->get(back_block);
+    T* curr_block = block_map.get(back_block);
     T curr_elem = curr_block[back_index];
 
     count--;
@@ -47,7 +47,7 @@ template <class T>
 T SegmentDeque<T>::sys_pop_front() {;
     if (count == 0) throw std::out_of_range("Deque is empty");
 
-    T* curr_block = block_map->get(front_block);
+    T* curr_block = block_map.get(front_block);
     T curr_elem = curr_block[front_index];
 
     front_index++;
@@ -64,7 +64,7 @@ T SegmentDeque<T>::sys_pop_front() {;
 
 template <class T>
 void SegmentDeque<T>::sys_push_back(const T& item) {
-    T* curr_block = block_map->get(back_block);
+    T* curr_block = block_map.get(back_block);
     curr_block[back_index] = item;
     back_index++;
 
@@ -76,8 +76,8 @@ void SegmentDeque<T>::sys_push_back(const T& item) {
             grow_map_back();
         }
 
-        if (block_map->get(back_block) == nullptr) {
-            block_map->set(back_block, allocate_block());
+        if (block_map.get(back_block) == nullptr) {
+            block_map.set(back_block, allocate_block());
         }
     }
 
@@ -93,15 +93,15 @@ template <class T>
 void SegmentDeque<T>::grow_map_front() {    
     int old_capacity = map_capacity;
     map_capacity = map_capacity * 2;
-    block_map->resize(map_capacity);
+    block_map.resize(map_capacity);
 
     for (int index = map_capacity - 1; index >= old_capacity; index--) {
-        T* old_block = block_map->get(index - old_capacity);
-        block_map->set(index, old_block);
+        T* old_block = block_map.get(index - old_capacity);
+        block_map.set(index, old_block);
     }
 
     for (int index = old_capacity - 1; index >= 0; index--) {
-        block_map->set(index, nullptr);
+        block_map.set(index, nullptr);
     }
 
     front_block += old_capacity;
@@ -112,10 +112,10 @@ template <class T>
 void SegmentDeque<T>::grow_map_back() {
     int old_capacity = map_capacity;
     map_capacity = map_capacity * 2;
-    block_map->resize(map_capacity);
+    block_map.resize(map_capacity);
 
     for (int index = old_capacity; index < map_capacity; index++) {
-        block_map->set(index, nullptr);
+        block_map.set(index, nullptr);
     }
 }
 
@@ -129,14 +129,14 @@ void SegmentDeque<T>::resolve_index(int index, int* block, int* offset) const {
 
 template <class T>
 SegmentDeque<T>::SegmentDeque() {
-    block_map = new DynamicArray<T*>(4);
+    block_map = DynamicArray<T*>(4);
 
     for (int index = 0; index < 4; index++) {
-        block_map->set(index, nullptr);
+        block_map.set(index, nullptr);
     }
 
     T* init_block = allocate_block();
-    block_map->set(1, init_block); // Ставим начальный блок по центру
+    block_map.set(1, init_block); // Ставим начальный блок по центру
 
     front_block = 1;
     back_block = 1;
@@ -203,19 +203,17 @@ SegmentDeque<T>& SegmentDeque<T>::operator=(const SegmentDeque<T>& other) {
     if (this == &other) return *this;
 
     for (int index = 0; index < this->map_capacity; index++) {
-        delete[] block_map->get(index);
+        delete[] block_map.get(index);
     }
 
-    delete block_map;
-
-    block_map = new DynamicArray<T*>(4);
+    block_map = DynamicArray<T*>(4);
 
     for (int index = 0; index < 4; index++) {
-        block_map->set(index, nullptr);
+        block_map.set(index, nullptr);
     }
 
     T* init_block = allocate_block();
-    block_map->set(1, init_block); // Ставим начальный блок по центру
+    block_map.set(1, init_block); // Ставим начальный блок по центру
 
     front_block = 1;
     back_block = 1;
@@ -235,7 +233,7 @@ template <class T>
 const T& SegmentDeque<T>::get_first() const {
     if (count == 0) throw std::out_of_range("Deque is empty");
 
-    T* curr_block = block_map->get(front_block);
+    T* curr_block = block_map.get(front_block);
 
     return curr_block[front_index];
 }
@@ -247,7 +245,7 @@ const T& SegmentDeque<T>::get_last() const {
     int curr_block_index, offset;
     resolve_index(count - 1, &curr_block_index, &offset); // Получаем положение последнего элементам дека
 
-    T* curr_block = block_map->get(curr_block_index);
+    T* curr_block = block_map.get(curr_block_index);
 
     return curr_block[offset];
 }
@@ -259,7 +257,7 @@ const T& SegmentDeque<T>::get(int index) const {
     int block_index, offset;
     resolve_index(index, &block_index, &offset);
 
-    T* curr_block = block_map->get(block_index);
+    T* curr_block = block_map.get(block_index);
 
     return curr_block[offset];
 }
@@ -268,7 +266,7 @@ template <class T>
 Option<T> SegmentDeque<T>::try_get_first() const {
     if (count == 0) return Option<T>::None();
 
-    T* curr_block = block_map->get(front_block);
+    T* curr_block = block_map.get(front_block);
 
     return Option<T>::Some(curr_block[front_index]);
 }
@@ -280,7 +278,7 @@ Option<T> SegmentDeque<T>::try_get_last() const {
     int curr_block_index, offset;
     resolve_index(count - 1, &curr_block_index, &offset);
 
-    T* curr_block = block_map->get(curr_block_index);
+    T* curr_block = block_map.get(curr_block_index);
 
     return Option<T>::Some(curr_block[offset]);
 }
@@ -292,7 +290,7 @@ Option<T> SegmentDeque<T>::try_get(int index) const {
     int curr_block_index, offset;
     resolve_index(index, &curr_block_index, &offset);
 
-    T* curr_block = block_map->get(curr_block_index);
+    T* curr_block = block_map.get(curr_block_index);
 
     return Option<T>::Some(curr_block[offset]);
 }
@@ -348,7 +346,7 @@ Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int target_index) {
     int curr_block_index, offset;
     resolve_index(target_index, &curr_block_index, &offset);
     
-    T* curr_block = inst->block_map->get(curr_block_index);
+    T* curr_block = inst->block_map.get(curr_block_index);
 
     for (int index = count - 1; index > target_index; index--) {
         int write_block, write_offset; // Куда пишем
@@ -357,8 +355,8 @@ Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int target_index) {
         int read_block, read_offset; // Откуда пишем
         resolve_index(index - 1, &read_block, &read_offset);
 
-        T* curr_write_block = inst->block_map->get(write_block);
-        T* curr_read_block = inst->block_map->get(read_block);
+        T* curr_write_block = inst->block_map.get(write_block);
+        T* curr_read_block = inst->block_map.get(read_block);
 
         curr_write_block[write_offset] = curr_read_block[read_offset];                              
     }
@@ -527,9 +525,7 @@ int SegmentDeque<T>::find_sub_sequence(const Sequence<T>* sub) const {
 template <class T>
 SegmentDeque<T>::~SegmentDeque() {
     for (int index = 0; index < map_capacity; index++) {
-        delete[] block_map->get(index);
+        delete[] block_map.get(index);
     }
-
-    delete block_map;
 }
 

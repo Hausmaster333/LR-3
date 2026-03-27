@@ -1,12 +1,12 @@
 #ifndef BIT_SEQUENCE_H
 #define BIT_SEQUENCE_H
 
-#include "sequence.h"
-#include "bit.h"
+#include "core/sequence.h"
+#include "types/bit.h"
 
 class BitSequence : public Sequence<Bit> {
     private:
-        DynamicArray<unsigned char>* data;
+        DynamicArray<unsigned char> data;
         int bit_count;
         mutable Bit cached_bit; // Чтобы могли возвращаться const Bit&, т.к. биты упакованы по 8 бит в байт
 
@@ -73,9 +73,7 @@ class BitSequence : public Sequence<Bit> {
             return new Enumerator(this);
         }
 
-        ~BitSequence() override {
-            delete data;
-        };
+        ~BitSequence() override {};
 };
 
 

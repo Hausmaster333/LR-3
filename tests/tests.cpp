@@ -1,6 +1,6 @@
 #include "utils.h"
-#include "sequence.h"
-#include "bit_sequence.h"
+#include "core/sequence.h"
+#include "types/bit_sequence.h"
 #include <gtest/gtest.h>
 
 int square(const int& x) {

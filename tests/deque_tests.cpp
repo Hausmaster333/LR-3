@@ -1,6 +1,6 @@
-#include "segment_deque.h"
-#include "complex.h"
-#include "person_types.h"
+#include "deque/segment_deque.h"
+#include "types/complex.h"
+#include "types/person_types.h"
 #include <gtest/gtest.h>
 #include <string>
 

@@ -1,4 +1,4 @@
-#include "linked_list.h"
+#include "core/linked_list.h"
 #include <stdexcept>
 
 template <class T>
@@ -36,28 +36,30 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other): head(nullptr), tail(nullp
     }
 }
 
-// template <class T>
-// LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
-//     if (this == &other) return *this; // Чтобы не самоприсваивать
+template <class T>
+LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
+    if (this == &other) return *this; // Чтобы не самоприсваивать
 
-//     Node* current = head;
-//     while (current != nullptr) {
-//         Node* tmp = current;
-//         current = current->next;
-//         delete tmp;
-//     }
+    Node* current = head;
+    while (current != nullptr) {
+        Node* tmp = current;
+        current = current->next;
+        delete tmp;
+    }
 
-//     head = nullptr;
-//     tail = nullptr;
-//     length = 0;
+    head = nullptr;
+    tail = nullptr;
+    length = 0;
 
-//     for (auto curr = other.start(); curr != other.end(); curr++) {
-//         T curr_elem = *curr;
-//         append(curr_elem);
-//     }
+    EnumeratorWrapper<T> other_iter(get_enumerator());
+    while (other_iter.move_next()) {
+        T curr_elem = other_iter.get_current();
+        append(curr_elem);
+    }
 
-//     return *this;
-// }
+    return *this;
+}
+
 
 template <class T>
 const T& LinkedList<T>::get_first() const {

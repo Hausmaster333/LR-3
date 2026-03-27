@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "sequence.h"
+#include "core/sequence.h"
 
 template <class T>
 Sequence<Sequence<T>*>* split(const Sequence<T>* seq, bool (*predicate)(const T&)) {
