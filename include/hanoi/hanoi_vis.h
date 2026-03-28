@@ -64,7 +64,7 @@ static void generate_hanoi_html(MutableSegmentedDeque<HanoiMove>& moves,
         if (i > 0) file << ",";
         file << "{size:" << initial_rings.get(i).get_size()
              << ",color:'" << initial_rings.get(i).get_color()
-             << "',shape:'" << initial_rings.get(i).get_shape() << "'}";
+             << "'}";
     }
     file << "];" << std::endl;
 
@@ -149,7 +149,7 @@ function nextStep() {
     
     // Информация о коде
     document.getElementById('info').textContent = 
-        'Ring ' + m.size + ' (' + m.color + '): stick ' + m.from + ' -> stick ' + m.to;
+        'Ring ' + m.size + ': stick ' + m.from + ' -> stick ' + m.to;
     
     render();
 }
@@ -168,7 +168,7 @@ function prevStep() {
     if(currentStep >= 0) {
         var pm = moves[currentStep];
         document.getElementById('info').textContent = 
-            'Ring ' + pm.size + ' (' + pm.color + '): stick ' + pm.from + ' -> stick ' + pm.to;
+            'Ring ' + pm.size + ': stick ' + pm.from + ' -> stick ' + pm.to;
     } else {
         document.getElementById('info').textContent = 'Press Start or Next Step';
     }
@@ -199,7 +199,6 @@ function autoPlay() {
         nextStep();
     }, 600);
 }
-
 
 function resetAll() {
     // Если автоплей работает — останавливаем
