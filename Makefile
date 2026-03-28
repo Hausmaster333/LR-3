@@ -14,7 +14,7 @@ seq_tests: tests/tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_
 deq_tests: tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
 	$(CC) $(CFLAGS) $(GTEST_FLAGS) tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc -o deq_tests
 
-deq_tests_leak: tests/deq_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
+deq_tests_leak: tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
 	$(CC) $(CFLAGS) -g -O0 $(GTEST_FLAGS) tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc -o deq_tests_leak
 #valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./deq_tests_leak
 clean:
