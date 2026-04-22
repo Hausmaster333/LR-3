@@ -523,6 +523,29 @@ int SegmentDeque<T>::find_sub_sequence(const Sequence<T>* sub) const {
 }
 
 template <class T>
+void SegmentDeque<T>::reset_deque() {
+    for (int index = 0; index < this->map_capacity; index++) {
+        delete[] block_map.get(index);
+    }
+
+    block_map = DynamicArray<T*>(4);
+
+    for (int index = 0; index < 4; index++) {
+        block_map.set(index, nullptr);
+    }
+
+    T* init_block = allocate_block();
+    block_map.set(1, init_block); // Ставим начальный блок по центру
+
+    front_block = 1;
+    back_block = 1;
+    front_index = 4; // Ставим в первом сегменте посередине первый элемент
+    back_index = 4;
+    count = 0;
+    map_capacity = 4;
+}
+
+template <class T>
 SegmentDeque<T>::~SegmentDeque() {
     for (int index = 0; index < map_capacity; index++) {
         delete[] block_map.get(index);

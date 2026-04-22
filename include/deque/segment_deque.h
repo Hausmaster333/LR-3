@@ -5,6 +5,11 @@
 
 template <class T>
 class SegmentDeque: public Sequence<T> {
+    template <class U>
+    friend void render_deque(const SegmentDeque<U>& deque);
+    
+    template <class U>
+    friend size_t measure_deque_memory(const SegmentDeque<U>& deque);
     private:
         void sys_push_front(const T& item); // Всегда меняют this вне зависимости от Mutable/Immutable
         void sys_push_back(const T& item);
@@ -90,6 +95,8 @@ class SegmentDeque: public Sequence<T> {
         IEnumerator<T>* get_enumerator() const override {
             return new Enumerator(this);
         }
+
+        void reset_deque();
 
         ~SegmentDeque() override;
 };

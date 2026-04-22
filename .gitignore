@@ -1,8 +1,10 @@
 program
 hanoi.html
+.vscode
 # Prerequisites
 *.d
-
+*.ini
+*.mp4
 # Compiled Object files
 *.slo
 *.lo

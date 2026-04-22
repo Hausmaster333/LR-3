@@ -38,6 +38,8 @@ class Sequence {
 
 template <class T>
 class ArraySequence : public Sequence<T> {
+    template <class U>
+    friend size_t measure_array_seq_memory(const ArraySequence<U>& seq);
     protected:    
         DynamicArray<T> array;
         int count;
@@ -81,6 +83,8 @@ class ArraySequence : public Sequence<T> {
 
 template <class T>
 class ListSequence : public Sequence<T> {
+    template <class U>
+    friend size_t measure_list_seq_memory(const ListSequence<U>& seq);
     protected:    
         LinkedList<T> list;
     public:
