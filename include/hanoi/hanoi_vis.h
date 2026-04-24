@@ -149,7 +149,7 @@ function nextStep() {
     
     // Информация о коде
     document.getElementById('info').textContent = 
-        'Ring ' + m.size + ': stick ' + m.from + ' -> stick ' + m.to;
+        'Ring ' + m.size + ' stick ' + m.from + ' -> stick ' + m.to;
     
     render();
 }
@@ -168,7 +168,7 @@ function prevStep() {
     if(currentStep >= 0) {
         var pm = moves[currentStep];
         document.getElementById('info').textContent = 
-            'Ring ' + pm.size + ': stick ' + pm.from + ' -> stick ' + pm.to;
+            'Ring ' + pm.size + ' stick ' + pm.from + ' -> stick ' + pm.to;
     } else {
         document.getElementById('info').textContent = 'Press Start or Next Step';
     }
