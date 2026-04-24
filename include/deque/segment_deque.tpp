@@ -40,6 +40,15 @@ T SegmentDeque<T>::sys_pop_back() {
 
     count--;
 
+    for (int i = back_block + 2; i < map_capacity; i++) {
+        if (block_map.get(i) != nullptr) {
+            delete[] block_map.get(i);
+            block_map.set(i, nullptr);
+        }
+    }
+
+    shrink_map();
+
     return curr_elem;
 }
 
@@ -58,6 +67,15 @@ T SegmentDeque<T>::sys_pop_front() {;
     }
 
     count--;
+
+    for (int i = front_block - 2; i >= 0; i--) {
+        if (block_map.get(i) != nullptr) {
+            delete[] block_map.get(i);
+            block_map.set(i, nullptr);
+        }
+    }
+
+    shrink_map();
 
     return curr_elem;
 }
@@ -117,6 +135,37 @@ void SegmentDeque<T>::grow_map_back() {
     for (int index = old_capacity; index < map_capacity; index++) {
         block_map.set(index, nullptr);
     }
+}
+
+template <class T>
+void SegmentDeque<T>::shrink_map() {
+    // Если карта слишком большая относительно использования — сжимаем
+    int used_blocks = (count == 0) ? 1 : (back_block - front_block + 1);
+    
+    if (map_capacity <= 4 || used_blocks * 4 > map_capacity) return; // сжимать не нужно
+    
+    int new_capacity = map_capacity / 2;
+    // Но новая ёмкость должна вмещать used_blocks + запасные
+    if (new_capacity < used_blocks + 2) new_capacity = used_blocks + 2;
+    if (new_capacity < 4) new_capacity = 4;
+    
+    // Сдвигаем используемые блоки в начало карты (с одним пустым блоком перед front)
+    int shift = front_block - 1;  // оставляем 1 запасной блок слева
+    if (shift < 0) shift = 0;
+    
+    if (shift > 0) {
+        for (int i = 0; i + shift < map_capacity; i++) {
+            block_map.set(i, block_map.get(i + shift));
+        }
+        for (int i = map_capacity - shift; i < map_capacity; i++) {
+            block_map.set(i, nullptr);
+        }
+        front_block -= shift;
+        back_block -= shift;
+    }
+    
+    block_map.resize(new_capacity);
+    map_capacity = new_capacity;
 }
 
 template <class T>
@@ -520,6 +569,29 @@ int SegmentDeque<T>::find_sub_sequence(const Sequence<T>* sub) const {
     }
 
     return -1;
+}
+
+template <class T>
+void SegmentDeque<T>::reset_deque() {
+    for (int index = 0; index < this->map_capacity; index++) {
+        delete[] block_map.get(index);
+    }
+
+    block_map = DynamicArray<T*>(4);
+
+    for (int index = 0; index < 4; index++) {
+        block_map.set(index, nullptr);
+    }
+
+    T* init_block = allocate_block();
+    block_map.set(1, init_block); // Ставим начальный блок по центру
+
+    front_block = 1;
+    back_block = 1;
+    front_index = 4; // Ставим в первом сегменте посередине первый элемент
+    back_index = 4;
+    count = 0;
+    map_capacity = 4;
 }
 
 template <class T>

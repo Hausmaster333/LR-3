@@ -1060,7 +1060,7 @@ void menu_performance() {
 
 void menu_run_tests() {
     std::cout << "\nRunning tests..." << std::endl;
-    int ret = system("./tests");
+    int ret = system("deq_tests");
     if (ret != 0) {
         std::cout << "Error running tests" << std::endl;
     }

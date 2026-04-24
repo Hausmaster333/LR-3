@@ -96,6 +96,11 @@ int LinkedList<T>::get_length() const {
 }
 
 template <class T>
+size_t LinkedList<T>::get_node_size() const {
+    return sizeof(Node);
+}
+
+template <class T>
 LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
     if (start < 0 || end < 0 || start >= length || end >= length || start > end) {
         throw std::out_of_range("Index out of range");

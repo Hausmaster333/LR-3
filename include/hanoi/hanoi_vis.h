@@ -64,7 +64,7 @@ static void generate_hanoi_html(MutableSegmentedDeque<HanoiMove>& moves,
         if (i > 0) file << ",";
         file << "{size:" << initial_rings.get(i).get_size()
              << ",color:'" << initial_rings.get(i).get_color()
-             << "',shape:'" << initial_rings.get(i).get_shape() << "'}";
+             << "'}";
     }
     file << "];" << std::endl;
 
@@ -199,7 +199,6 @@ function autoPlay() {
         nextStep();
     }, 600);
 }
-
 
 function resetAll() {
     // Если автоплей работает — останавливаем

@@ -5,6 +5,11 @@
 
 template <class T>
 class SegmentDeque: public Sequence<T> {
+    template <class U>
+    friend void render_deque(const SegmentDeque<U>& deque);
+    
+    template <class U>
+    friend size_t measure_deque_memory(const SegmentDeque<U>& deque);
     private:
         void sys_push_front(const T& item); // Всегда меняют this вне зависимости от Mutable/Immutable
         void sys_push_back(const T& item);
@@ -15,15 +20,17 @@ class SegmentDeque: public Sequence<T> {
         DynamicArray<T*> block_map; // Динамический массив указателей на T
         int map_capacity;
         int front_block;
-        int front_index;
+        int front_index; // Позиция первого элемента
         int back_block;
-        int back_index;
+        int back_index; // Позиция за последним элементом
         int count;
         static const int segment_size = 8; // static - одно значение на класс, а не на объект. const - нельзя изменить
         
         T* allocate_block();
         void grow_map_front();
         void grow_map_back();
+
+        void shrink_map();
 
         void resolve_index(int index, int* block, int* offset) const; // Из index получает пару block + offset(смещение внутри block)    
     public:
@@ -90,6 +97,8 @@ class SegmentDeque: public Sequence<T> {
         IEnumerator<T>* get_enumerator() const override {
             return new Enumerator(this);
         }
+
+        void reset_deque();
 
         ~SegmentDeque() override;
 };
