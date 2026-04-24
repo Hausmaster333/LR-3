@@ -26,10 +26,20 @@ static bool g_benchmarks_done = false;
 
 int g_map_choice = 0;
 const char* g_map_funcs[] = {"x * 2", "x squared", "-x"};
-
 int map_double(const int& x) { return x * 2; }
 int map_square(const int& x) { return x * x; }
-int map_negate(const int& x) { return -x; }
+int map_negative(const int& x) { return -x; }
+
+int g_where_choice = 0;
+const char* g_where_preds[] = {"x > 0", "x is even", "x < 10"};
+bool where_positive(const int& x) { return x > 0; }
+bool where_even(const int& x) { return x % 2 == 0; }
+bool where_less_10(const int& x) { return x < 10; }
+
+int g_sort_order = 0;
+const char* g_sort_orders[] = {"Ascending", "Descending"};
+bool sort_less(const int& a, const int& b) { return a < b; }
+bool sort_greater(const int& a, const int& b) { return a > b; }
 
 int main() {
     // 1. Инициализируем GLFW (оконная система)
@@ -115,15 +125,13 @@ int main() {
         ImGui::Separator();
 
         ImGui::Text("Map");
-
-        // Combo (dropdown) — выбор функции
-        ImGui::Combo("Function##map", &g_map_choice, g_map_funcs, 3);
+        ImGui::Combo("Function##map", &g_map_choice, g_map_funcs, 3); // Выпадающий список
 
         if (ImGui::Button("Apply Map")) {
             int (*func)(const int&) = nullptr;
             if (g_map_choice == 0) func = map_double;
             else if (g_map_choice == 1) func = map_square;
-            else if (g_map_choice == 2) func = map_negate;
+            else if (g_map_choice == 2) func = map_negative;
             
             Sequence<int>* result = g_deque.map(func);
             
@@ -132,6 +140,32 @@ int main() {
             delete result;
         }
 
+        ImGui::Separator();
+
+        ImGui::Text("Where");
+        ImGui::Combo("Predicate##where", &g_where_choice, g_where_preds, 3); // Выпадающий список
+
+        if (ImGui::Button("Apply Where")) {
+            bool (*pred)(const int&) = nullptr;
+            if (g_where_choice == 0) pred = where_positive;
+            else if (g_where_choice == 1) pred = where_even;
+            else if (g_where_choice == 2) pred = where_less_10;
+            
+            Sequence<int>* result = g_deque.where(pred);
+            g_deque = *dynamic_cast<MutableSegmentedDeque<int>*>(result);
+            delete result;
+        }
+
+        ImGui::Separator();
+        ImGui::Text("Sort");
+
+        ImGui::Combo("Order##sort", &g_sort_order, g_sort_orders, 2);
+
+        if (ImGui::Button("Sort")) {
+            if (g_sort_order == 0) g_deque.sort(sort_less);
+            else g_deque.sort(sort_greater);
+        }
+        
         ImGui::End();
 
         // ======== Benchmarks menu
@@ -184,7 +218,6 @@ int main() {
                 ImPlot::EndPlot();
             }
     
-
             if (ImGui::BeginTable("get_bench_table", 4, ImGuiTableFlags_Borders)) {
                 ImGui::TableSetupColumn("Size");
                 ImGui::TableSetupColumn("Deque (ms)");
@@ -212,7 +245,6 @@ int main() {
                 ImPlot::EndPlot();
             }
     
-
             if (ImGui::BeginTable("memory_bench_table", 4, ImGuiTableFlags_Borders)) {
                 ImGui::TableSetupColumn("Size");
                 ImGui::TableSetupColumn("Deque (KB)");
@@ -230,6 +262,25 @@ int main() {
                 ImGui::EndTable();
             }
             ImGui::EndChild();
+
+        }
+
+        if (ImGui::Button("Stress Test Memory")) {
+            size_t before = measure_deque_memory(g_deque);
+            
+            // Заполняем
+            for (int i = 0; i < 10000; i++) g_deque.push_back(i);
+            for (int i = 0; i < 10000; i++) g_deque.push_front(i);
+            size_t after_push = measure_deque_memory(g_deque);
+
+            // Опустошаем
+            int val;
+            for (int i = 0; i < 10000; i++) g_deque.pop_back(&val);
+            for (int i = 0; i < 10000; i++) g_deque.pop_front(&val);
+            size_t after_pop = measure_deque_memory(g_deque);
+
+            printf("Before: %zu B, After push: %zu B, After pop: %zu B\n",
+                before, after_push, after_pop);
         }
 
         ImGui::End();

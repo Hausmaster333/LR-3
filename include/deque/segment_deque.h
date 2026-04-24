@@ -20,15 +20,17 @@ class SegmentDeque: public Sequence<T> {
         DynamicArray<T*> block_map; // Динамический массив указателей на T
         int map_capacity;
         int front_block;
-        int front_index;
+        int front_index; // Позиция первого элемента
         int back_block;
-        int back_index;
+        int back_index; // Позиция за последним элементом
         int count;
         static const int segment_size = 8; // static - одно значение на класс, а не на объект. const - нельзя изменить
         
         T* allocate_block();
         void grow_map_front();
         void grow_map_back();
+
+        void shrink_map();
 
         void resolve_index(int index, int* block, int* offset) const; // Из index получает пару block + offset(смещение внутри block)    
     public:
