@@ -8,7 +8,7 @@ struct HanoiMove {
     int from_stick_index;
     int to_stick_index;
     int ring_size;
-    const char* ring_color;
+    char ring_color[64];
 };
 
 #include "hanoi_vis.h"
@@ -24,7 +24,14 @@ static void hanoi_recursive(int n, // Количество колец
     if (n == 1) {
         from.pop_back(&elem);
         to.push_back(elem);
-        moves.push_back(HanoiMove{from_id, to_id, elem.get_size(), elem.get_color()});
+
+        HanoiMove move;
+        move.from_stick_index = from_id;
+        move.to_stick_index = to_id;
+        move.ring_size = elem.get_size();
+        strcpy(move.ring_color, elem.get_color());
+        moves.push_back(move);
+
         return;
     }
 
@@ -32,8 +39,14 @@ static void hanoi_recursive(int n, // Количество колец
 
     from.pop_back(&elem); // Самое большое перемещаем
     to.push_back(elem);
-    moves.push_back(HanoiMove{from_id, to_id, elem.get_size(), elem.get_color()});
 
+    HanoiMove move;
+    move.from_stick_index = from_id;
+    move.to_stick_index = to_id;
+    move.ring_size = elem.get_size();
+    strcpy(move.ring_color, elem.get_color());
+    moves.push_back(move);
+        
     hanoi_recursive(n - 1, aux, aux_id, to, to_id, from, from_id, moves); // Перемещаем n - 1 колец на целевой стержень
 };
 
