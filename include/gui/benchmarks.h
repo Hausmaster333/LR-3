@@ -15,7 +15,7 @@ size_t measure_deque_memory(const SegmentDeque<U>& deque) {
     for (int i = 0; i < deque.map_capacity; i++) {
         if (deque.block_map.get(i) != nullptr) allocated++;
     }
-    size += allocated * 8 * sizeof(U);  // 8 = segment_size
+    size += allocated * deque.segment_size * sizeof(U);  // 8 = segment_size
     
     return size;
 };
