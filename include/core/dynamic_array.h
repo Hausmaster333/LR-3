@@ -50,7 +50,11 @@ class DynamicArray {
 
         IEnumerator<T>* get_enumerator() const {
             return new Enumerator(data, size);
-        }            
+        }
+
+        IEnumerator<T>* get_enumerator(int count) const {
+            return new Enumerator(data, count);
+        }
 };
 
 #include "dynamic_array.tpp"

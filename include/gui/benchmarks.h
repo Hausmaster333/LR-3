@@ -5,10 +5,21 @@
 #include "imgui.h"
 #include <chrono>
 #include <random>
+#include <windows.h>
+#include <psapi.h>
+#include <malloc.h>
+
+size_t get_process_memory() {
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        return pmc.WorkingSetSize;  // байты физической памяти
+    }
+    return 0;
+}
 
 template <class U>
-size_t measure_deque_memory(const SegmentDeque<U>& deque) {
-    size_t size = sizeof(SegmentDeque<U>);
+size_t measure_deque_memory(const SegmentedDeque<U>& deque) {
+    size_t size = sizeof(SegmentedDeque<U>);
     size += deque.map_capacity * sizeof(U*);
     
     int allocated = 0;
@@ -124,9 +135,21 @@ void run_get_benchmark(double* deque_times, double* array_times, double* list_ti
         // --- Замер ListSequence ---
         t1 = std::chrono::high_resolution_clock::now();
         volatile int sum3 = 0;
+
+        EnumeratorWrapper<int> iter(list.get_enumerator());
+
         for (int i = 0; i < ACCESSES; i++) {
-            sum3 += list.get(indices[i]);
+            int target_index = indices[i];
+
+            iter.reset();
+
+            for (int curr_index = 0; curr_index <= target_index; curr_index++) {
+                iter.move_next();
+            }
+
+            sum3 += iter.get_current();
         }
+
         t2 = std::chrono::high_resolution_clock::now();
         list_times[s] = std::chrono::duration<double, std::milli>(t2 - t1).count();
  
@@ -157,13 +180,61 @@ void run_memory_benchmark(double* deque_mem, double* array_mem, double* list_mem
     }
 }
 
+void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_mem) {
+    // Прогрев аллокатора — выделяем и освобождаем большой буфер
+    void* warmup = malloc(10 * 1024 * 1024);  // 10 МБ
+    if (warmup) free(warmup);
+    _heapmin();  // просим CRT вернуть свободные страницы ОС
+    
+    int sizes[] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
+    
+    for (int s = 0; s < 7; s++) {
+        int n = sizes[s];
+        
+        // SegmentedDeque
+        _heapmin();
+        Sleep(50);  // даём ОС обновить статистику
+        size_t before = get_process_memory();
+        {
+            MutableSegmentedDeque<int> deque;
+            for (int i = 0; i < n; i++) deque.push_back(i);
+            size_t after = get_process_memory();
+            deque_mem[s] = (double)(after - before) / 1024.0;
+        }
+        
+        // ArraySequence
+        _heapmin();
+        Sleep(50);
+        before = get_process_memory();
+        {
+            MutableArraySequence<int> arr;
+            for (int i = 0; i < n; i++) arr.append(i);
+            size_t after = get_process_memory();
+            array_mem[s] = (double)(after - before) / 1024.0;
+        }
+        
+        // ListSequence
+        _heapmin();
+        Sleep(50);
+        before = get_process_memory();
+        {
+            MutableListSequence<int> list;
+            for (int i = 0; i < n; i++) list.append(i);
+            size_t after = get_process_memory();
+            list_mem[s] = (double)(after - before) / 1024.0;
+        }
+    }
+}
+
 void run_benchmarks(double* deque_push_front_times, double* array_push_front_times, double* list_push_front_times,
                     double* deque_get_times, double* array_get_times, double* list_get_times,
-                    double* deque_mem, double* array_mem, double* list_mem) {
+                    double* deque_mem, double* array_mem, double* list_mem,
+                    double* deque_os_mem, double* array_os_mem, double* list_os_mem) {
 
     run_push_front_benchmark(deque_push_front_times, array_push_front_times, list_push_front_times);
     run_get_benchmark(deque_get_times, array_get_times, list_get_times);
     run_memory_benchmark(deque_mem, array_mem, list_mem);
+    run_os_memory_benchmark(deque_os_mem, array_os_mem, list_os_mem);
 };
 
 #endif

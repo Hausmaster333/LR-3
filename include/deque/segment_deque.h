@@ -4,12 +4,12 @@
 #include "core/sequence.h"
 
 template <class T>
-class SegmentDeque: public Sequence<T> {
+class SegmentedDeque: public Sequence<T> {
     template <class U>
-    friend void render_deque(const SegmentDeque<U>& deque);
+    friend void render_deque(const SegmentedDeque<U>& deque);
     
     template <class U>
-    friend size_t measure_deque_memory(const SegmentDeque<U>& deque);
+    friend size_t measure_deque_memory(const SegmentedDeque<U>& deque);
     private:
         void sys_push_front(const T& item); // Всегда меняют this вне зависимости от Mutable/Immutable
         void sys_push_back(const T& item);
@@ -32,53 +32,51 @@ class SegmentDeque: public Sequence<T> {
 
         void shrink_map();
 
-        void resolve_index(int index, int* block, int* offset) const; // Из index получает пару block + offset(смещение внутри block)    
+        void resolve_index(int index, int* block, int* offset) const; // Из index получает пару block + offset(смещение внутри block)
+        
+        void sys_append(const T& item) override;
+        Sequence<T>* sys_empty_clone() const override;
+
+        virtual SegmentedDeque<T>* Instance() = 0;
+        virtual SegmentedDeque<T>* EmptyClone() const = 0;        
     public:
-        SegmentDeque();
-        SegmentDeque(const T* items, int count);
-        SegmentDeque(const SegmentDeque<T>& other);
+        SegmentedDeque();
+        SegmentedDeque(const T* items, int count);
+        SegmentedDeque(const SegmentedDeque<T>& other);
 
-        SegmentDeque<T>* push_front(const T& item);
-        SegmentDeque<T>* push_back(const T& item);
-        SegmentDeque<T>* pop_front(T* result);
-        SegmentDeque<T>* pop_back(T* result);
+        SegmentedDeque<T>* push_front(const T& item);
+        SegmentedDeque<T>* push_back(const T& item);
+        SegmentedDeque<T>* pop_front(T* result);
+        SegmentedDeque<T>* pop_back(T* result);
 
-        virtual SegmentDeque<T>* Instance() = 0;
-        virtual SegmentDeque<T>* EmptyClone() = 0;
-
-        SegmentDeque<T>& operator=(const SegmentDeque<T>& other);
+        SegmentedDeque<T>& operator=(const SegmentedDeque<T>& other);
 
         const T& get_first() const override;
         const T& get_last() const override;
-        const T& get(int index) const override;
+        const T& get(int index) const;
 
         Option<T> try_get_first() const override;
         Option<T> try_get_last() const override;
-        Option<T> try_get(int index) const override;
+        Option<T> try_get(int index) const;
 
         int get_count() const override;
 
-        Sequence<T>* get_sub_sequence(int start, int end) override;
+        // Sequence<T>* get_sub_sequence(int start, int end) override;
         
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;
-        
-        Sequence<T>* concat(const Sequence<T>* other) override;
-        Sequence<T>* map(T (*func)(const T& elem)) override;
-        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
-        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
 
-        SegmentDeque<T>* merge(const SegmentDeque<T>* other, bool (*compare)(const T& a, const T& b) = nullptr); // Если nullptr, то сортируем через <
+        SegmentedDeque<T>* merge(const SegmentedDeque<T>* other, bool (*compare)(const T& a, const T& b) = nullptr); // Если nullptr, то сортируем через <
         void sort(bool (*compare)(const T& a, const T& b) = nullptr);
         int find_sub_sequence(const Sequence<T>* sub_seq) const;
 
         class Enumerator: public IEnumerator<T> {
             private:
-                const SegmentDeque<T>* deque;
+                const SegmentedDeque<T>* deque;
                 int index;
             public:
-                Enumerator(const SegmentDeque<T>* deque) : deque(deque), index(-1) {}
+                Enumerator(const SegmentedDeque<T>* deque) : deque(deque), index(-1) {}
 
                 bool move_next() override {
                     index++;
@@ -100,39 +98,19 @@ class SegmentDeque: public Sequence<T> {
 
         void reset_deque();
 
-        ~SegmentDeque() override;
+        ~SegmentedDeque() override;
 };
 
 template <class T>
-class MutableSegmentedDeque : public SegmentDeque<T> {
-    protected:
-        SegmentDeque<T>* Instance() override {
-            return this;
-        }
-        
-        SegmentDeque<T>* EmptyClone() override {
-            return new MutableSegmentedDeque<T>();
-        }
+class MutableSegmentedDeque : public SequenceCRTP<T, MutableSegmentedDeque<T>, true, SegmentedDeque> {
     public:
-        MutableSegmentedDeque() : SegmentDeque<T>() {}
-        MutableSegmentedDeque(const T* items, int count) : SegmentDeque<T>(items, count) {}
-        MutableSegmentedDeque(const SegmentDeque<T>& other) : SegmentDeque<T>(other) {}
+        using SequenceCRTP<T, MutableSegmentedDeque<T>, true, SegmentedDeque>::SequenceCRTP;
 };
 
 template <class T>
-class ImmutableSegmentedDeque : public SegmentDeque<T> {
-    protected:
-        SegmentDeque<T>* Instance() override {
-            return new ImmutableSegmentedDeque<T>(*this);
-        }
-        
-        SegmentDeque<T>* EmptyClone() override {
-            return new ImmutableSegmentedDeque<T>();
-        }
+class ImmutableSegmentedDeque : public SequenceCRTP<T, ImmutableSegmentedDeque<T>, false, SegmentedDeque> {
     public:
-        ImmutableSegmentedDeque() : SegmentDeque<T>() {}
-        ImmutableSegmentedDeque(const T* items, int count) : SegmentDeque<T>(items, count) {}
-        ImmutableSegmentedDeque(const SegmentDeque<T>& other) : SegmentDeque<T>(other) {}
+        using SequenceCRTP<T, ImmutableSegmentedDeque<T>, false, SegmentedDeque>::SequenceCRTP;
 };
 
 #include "segment_deque.tpp"

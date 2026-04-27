@@ -54,25 +54,35 @@ static bool ring_compare(const Ring& a, const Ring& b) {
     return a < b;  // Большие кольца первыми
 }
 
-void hanoi(MutableSegmentedDeque<Ring>& rings, int start_stick, int target_stick) { // Список предметов в виде дека + номер начального стержня -> создает 3 дека-стержня и кладет кольца на нужный
-    if (start_stick < 0 || start_stick > 2 || target_stick < 0 || target_stick > 2 || target_stick == start_stick) {
-        throw std::out_of_range("Stick can't be less than 0 and more than 2 and can't be same");
+static MutableSegmentedDeque<HanoiMove> hanoi_collect_moves(
+    const MutableSegmentedDeque<Ring>& rings, 
+    int start_stick, 
+    int target_stick) 
+{
+    if (start_stick < 0 || start_stick > 2 || 
+        target_stick < 0 || target_stick > 2 || 
+        target_stick == start_stick) {
+        throw std::out_of_range("Invalid sticks");
     }
+    
     MutableSegmentedDeque<HanoiMove> moves;
-
     MutableSegmentedDeque<Ring> sticks[3];
     sticks[start_stick] = rings;
-
+    
     int aux = 3 - start_stick - target_stick;
-
     sticks[start_stick].sort(ring_compare);
-
+    
     hanoi_recursive(sticks[start_stick].get_count(),
                     sticks[start_stick], start_stick,
                     sticks[target_stick], target_stick,
                     sticks[aux], aux,
                     moves);
+    
+    return moves;
+}
 
+void hanoi(MutableSegmentedDeque<Ring>& rings, int start_stick, int target_stick) { // Список предметов в виде дека + номер начального стержня -> создает 3 дека-стержня и кладет кольца на нужный
+    auto moves = hanoi_collect_moves(rings, start_stick, target_stick);
     generate_hanoi_html(moves, rings, start_stick);
 };
 

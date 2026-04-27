@@ -51,7 +51,7 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
     tail = nullptr;
     length = 0;
 
-    EnumeratorWrapper<T> other_iter(get_enumerator());
+    EnumeratorWrapper<T> other_iter(other.get_enumerator());
     while (other_iter.move_next()) {
         T curr_elem = other_iter.get_current();
         append(curr_elem);
@@ -59,7 +59,6 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
 
     return *this;
 }
-
 
 template <class T>
 const T& LinkedList<T>::get_first() const {
@@ -77,18 +76,6 @@ const T& LinkedList<T>::get_last() const {
     return tail->data;
 }
 
-template <class T>
-const T& LinkedList<T>::get(int index) const {
-    if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
-
-    Node* current = head;
-
-    for (int i = 0; i < index; i++) {
-        current = current->next;
-    }
-
-    return current->data;
-}
 
 template <class T>
 int LinkedList<T>::get_length() const {

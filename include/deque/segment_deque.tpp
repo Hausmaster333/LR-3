@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 template <class T>
-void SegmentDeque<T>::sys_push_front(const T& item) {
+void SegmentedDeque<T>::sys_push_front(const T& item) {
     front_index--;
 
     if (front_index < 0) {
@@ -25,7 +25,7 @@ void SegmentDeque<T>::sys_push_front(const T& item) {
 }
 
 template <class T>
-T SegmentDeque<T>::sys_pop_back() {
+T SegmentedDeque<T>::sys_pop_back() {
     if (count == 0) throw std::out_of_range("Deque is empty");
 
     back_index--;
@@ -53,7 +53,7 @@ T SegmentDeque<T>::sys_pop_back() {
 }
 
 template <class T>
-T SegmentDeque<T>::sys_pop_front() {;
+T SegmentedDeque<T>::sys_pop_front() {;
     if (count == 0) throw std::out_of_range("Deque is empty");
 
     T* curr_block = block_map.get(front_block);
@@ -81,7 +81,7 @@ T SegmentDeque<T>::sys_pop_front() {;
 }
 
 template <class T>
-void SegmentDeque<T>::sys_push_back(const T& item) {
+void SegmentedDeque<T>::sys_push_back(const T& item) {
     T* curr_block = block_map.get(back_block);
     curr_block[back_index] = item;
     back_index++;
@@ -103,12 +103,12 @@ void SegmentDeque<T>::sys_push_back(const T& item) {
 }
 
 template <class T>
-T* SegmentDeque<T>::allocate_block() {
+T* SegmentedDeque<T>::allocate_block() {
     return new T[segment_size];
 }   
 
 template <class T>
-void SegmentDeque<T>::grow_map_front() {    
+void SegmentedDeque<T>::grow_map_front() {    
     int old_capacity = map_capacity;
     map_capacity = map_capacity * 2;
     block_map.resize(map_capacity);
@@ -127,7 +127,7 @@ void SegmentDeque<T>::grow_map_front() {
 }
 
 template <class T>
-void SegmentDeque<T>::grow_map_back() {
+void SegmentedDeque<T>::grow_map_back() {
     int old_capacity = map_capacity;
     map_capacity = map_capacity * 2;
     block_map.resize(map_capacity);
@@ -138,7 +138,7 @@ void SegmentDeque<T>::grow_map_back() {
 }
 
 template <class T>
-void SegmentDeque<T>::shrink_map() {
+void SegmentedDeque<T>::shrink_map() {
     // Если карта слишком большая относительно использования — сжимаем
     int used_blocks = (count == 0) ? 1 : (back_block - front_block + 1);
     
@@ -169,7 +169,7 @@ void SegmentDeque<T>::shrink_map() {
 }
 
 template <class T>
-void SegmentDeque<T>::resolve_index(int index, int* block, int* offset) const { 
+void SegmentedDeque<T>::resolve_index(int index, int* block, int* offset) const { 
     int total_offset = front_index + index; // Самый первый индекс + смещение по индексу
 
     *block = front_block + total_offset / segment_size;
@@ -177,7 +177,17 @@ void SegmentDeque<T>::resolve_index(int index, int* block, int* offset) const {
 }
 
 template <class T>
-SegmentDeque<T>::SegmentDeque() {
+Sequence<T>* SegmentedDeque<T>::sys_empty_clone() const {
+    return EmptyClone();
+}
+
+template <class T>
+void SegmentedDeque<T>::sys_append(const T& item) {
+    sys_push_back(item);
+}
+
+template <class T>
+SegmentedDeque<T>::SegmentedDeque() {
     block_map = DynamicArray<T*>(4);
 
     for (int index = 0; index < 4; index++) {
@@ -196,14 +206,14 @@ SegmentDeque<T>::SegmentDeque() {
 }
 
 template <class T>
-SegmentDeque<T>::SegmentDeque(const T* items, int count) : SegmentDeque() {
+SegmentedDeque<T>::SegmentedDeque(const T* items, int count) : SegmentedDeque() {
     for (int index = 0; index < count; index++) {
         sys_push_back(items[index]);
     }
 }
 
 template <class T>
-SegmentDeque<T>::SegmentDeque(const SegmentDeque<T>& other) : SegmentDeque() {
+SegmentedDeque<T>::SegmentedDeque(const SegmentedDeque<T>& other) : SegmentedDeque() {
     for (int index = 0; index < other.get_count(); index++) {
         T other_elem = other.get(index);
 
@@ -212,8 +222,8 @@ SegmentDeque<T>::SegmentDeque(const SegmentDeque<T>& other) : SegmentDeque() {
 }
 
 template <class T>
-SegmentDeque<T>* SegmentDeque<T>::push_front(const T& item) {
-    SegmentDeque<T>* inst = Instance();
+SegmentedDeque<T>* SegmentedDeque<T>::push_front(const T& item) {
+    SegmentedDeque<T>* inst = Instance();
 
     inst->sys_push_front(item);
 
@@ -221,8 +231,8 @@ SegmentDeque<T>* SegmentDeque<T>::push_front(const T& item) {
 }
 
 template <class T>
-SegmentDeque<T>* SegmentDeque<T>::push_back(const T& item) {
-    SegmentDeque<T>* inst = Instance();
+SegmentedDeque<T>* SegmentedDeque<T>::push_back(const T& item) {
+    SegmentedDeque<T>* inst = Instance();
 
     inst->sys_push_back(item);
 
@@ -230,8 +240,8 @@ SegmentDeque<T>* SegmentDeque<T>::push_back(const T& item) {
 }
 
 template <class T>
-SegmentDeque<T>* SegmentDeque<T>::pop_front(T* result) {
-    SegmentDeque<T>* inst = Instance();
+SegmentedDeque<T>* SegmentedDeque<T>::pop_front(T* result) {
+    SegmentedDeque<T>* inst = Instance();
 
     *result = inst->sys_pop_front();
 
@@ -239,8 +249,8 @@ SegmentDeque<T>* SegmentDeque<T>::pop_front(T* result) {
 }
 
 template <class T>
-SegmentDeque<T>* SegmentDeque<T>::pop_back(T* result) {
-    SegmentDeque<T>* inst = Instance();
+SegmentedDeque<T>* SegmentedDeque<T>::pop_back(T* result) {
+    SegmentedDeque<T>* inst = Instance();
 
     *result = inst->sys_pop_back();
 
@@ -248,7 +258,7 @@ SegmentDeque<T>* SegmentDeque<T>::pop_back(T* result) {
 }
 
 template <class T>
-SegmentDeque<T>& SegmentDeque<T>::operator=(const SegmentDeque<T>& other) {
+SegmentedDeque<T>& SegmentedDeque<T>::operator=(const SegmentedDeque<T>& other) {
     if (this == &other) return *this;
 
     for (int index = 0; index < this->map_capacity; index++) {
@@ -279,7 +289,7 @@ SegmentDeque<T>& SegmentDeque<T>::operator=(const SegmentDeque<T>& other) {
 }
 
 template <class T>
-const T& SegmentDeque<T>::get_first() const {
+const T& SegmentedDeque<T>::get_first() const {
     if (count == 0) throw std::out_of_range("Deque is empty");
 
     T* curr_block = block_map.get(front_block);
@@ -288,7 +298,7 @@ const T& SegmentDeque<T>::get_first() const {
 }
 
 template <class T>
-const T& SegmentDeque<T>::get_last() const {
+const T& SegmentedDeque<T>::get_last() const {
     if (count == 0) throw std::out_of_range("Deque is empty");
     
     int curr_block_index, offset;
@@ -300,7 +310,7 @@ const T& SegmentDeque<T>::get_last() const {
 }
 
 template <class T>
-const T& SegmentDeque<T>::get(int index) const {
+const T& SegmentedDeque<T>::get(int index) const {
     if (index < 0 || index >= count) throw std::out_of_range("Index out of range");
 
     int block_index, offset;
@@ -312,7 +322,7 @@ const T& SegmentDeque<T>::get(int index) const {
 }
 
 template <class T>
-Option<T> SegmentDeque<T>::try_get_first() const {
+Option<T> SegmentedDeque<T>::try_get_first() const {
     if (count == 0) return Option<T>::None();
 
     T* curr_block = block_map.get(front_block);
@@ -321,7 +331,7 @@ Option<T> SegmentDeque<T>::try_get_first() const {
 }
 
 template <class T>
-Option<T> SegmentDeque<T>::try_get_last() const {
+Option<T> SegmentedDeque<T>::try_get_last() const {
     if (count == 0) return Option<T>::None();
 
     int curr_block_index, offset;
@@ -333,7 +343,7 @@ Option<T> SegmentDeque<T>::try_get_last() const {
 }
 
 template <class T>
-Option<T> SegmentDeque<T>::try_get(int index) const {
+Option<T> SegmentedDeque<T>::try_get(int index) const {
     if (index < 0 || index >= count) return Option<T>::None();
 
     int curr_block_index, offset;
@@ -345,28 +355,28 @@ Option<T> SegmentDeque<T>::try_get(int index) const {
 }
 
 template <class T>
-int SegmentDeque<T>::get_count() const {
+int SegmentedDeque<T>::get_count() const {
     return count;
 }
 
-template <class T>
-Sequence<T>* SegmentDeque<T>::get_sub_sequence(int start, int end) {
-    if (count == 0) throw std::out_of_range("Deque is empty\n");
+// template <class T>
+// Sequence<T>* SegmentDeque<T>::get_sub_sequence(int start, int end) {
+//     if (count == 0) throw std::out_of_range("Deque is empty\n");
 
-    if (start < 0 || end < 0 || start >= count || end >= count || start > end) throw std::out_of_range("Index out of range");
+//     if (start < 0 || end < 0 || start >= count || end >= count || start > end) throw std::out_of_range("Index out of range");
 
-    SegmentDeque<T>* sub = EmptyClone();
+//     SegmentDeque<T>* sub = EmptyClone();
     
-    for (int index = start; index <= end; index++) {
-        sub->push_back(get(index));
-    }
+//     for (int index = start; index <= end; index++) {
+//         sub->push_back(get(index));
+//     }
 
-    return sub;
-}
+//     return sub;
+// }
 
 template <class T>
-Sequence<T>* SegmentDeque<T>::append(const T& item) {
-    SegmentDeque<T>* inst = Instance();
+Sequence<T>* SegmentedDeque<T>::append(const T& item) {
+    SegmentedDeque<T>* inst = Instance();
 
     inst->sys_push_back(item);
 
@@ -374,8 +384,8 @@ Sequence<T>* SegmentDeque<T>::append(const T& item) {
 }
 
 template <class T>
-Sequence<T>* SegmentDeque<T>::prepend(const T& item) {
-    SegmentDeque<T>* inst = Instance();
+Sequence<T>* SegmentedDeque<T>::prepend(const T& item) {
+    SegmentedDeque<T>* inst = Instance();
 
     inst->sys_push_front(item);
 
@@ -383,8 +393,8 @@ Sequence<T>* SegmentDeque<T>::prepend(const T& item) {
 }
 
 template <class T>
-Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int target_index) {
-    SegmentDeque<T>* inst = Instance();
+Sequence<T>* SegmentedDeque<T>::insert_at(const T& item, int target_index) {
+    SegmentedDeque<T>* inst = Instance();
 
     if (target_index < 0 || target_index > inst->count) {
         throw std::out_of_range("Index out of range");
@@ -416,81 +426,19 @@ Sequence<T>* SegmentDeque<T>::insert_at(const T& item, int target_index) {
 }
 
 template <class T>
-Sequence<T>* SegmentDeque<T>::concat(const Sequence<T>* other) {
-    if (other == nullptr) {
-        throw std::invalid_argument("Cannot concat with nullptr");
-    }
-
-    SegmentDeque<T>* concat_deque = EmptyClone();
-
-    for (int index = 0; index < count; index++) {
-        T curr_elem = get(index);
-
-        concat_deque->sys_push_back(curr_elem);
-    }
-
-    for (int index = 0; index < other->get_count(); index++) {
-        T curr_elem = other->get(index);
-
-        concat_deque->sys_push_back(curr_elem);
-    }
-
-    return concat_deque;
-}
-
-template <class T>
-Sequence<T>* SegmentDeque<T>::map(T (*func)(const T& elem)) {
-    SegmentDeque<T>* map_deque = EmptyClone();
-
-    for (int index = 0; index < count; index++) {
-        T curr_elem = get(index);
-
-        map_deque->sys_push_back(func(curr_elem));
-    }
-
-    return map_deque;
-}
-
-template <class T>
-Sequence<T>* SegmentDeque<T>::where(bool (*predicate)(const T& elem)) {
-    SegmentDeque<T>* where_deque = EmptyClone();
-
-    for (int index = 0; index < count; index++) {
-        T curr_elem = get(index);
-
-        if (predicate(curr_elem)) {
-            where_deque->sys_push_back(curr_elem);
-        }
-    }
-
-    return where_deque;
-}
-
-template <class T>
-T SegmentDeque<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) {
-    T reduced_elem = initial_elem;
-
-    for (int index = 0; index < count; index++) {
-        reduced_elem = func(get(index), reduced_elem);
-    }
-
-    return reduced_elem;
-}
-
-template <class T>
-void SegmentDeque<T>::sort(bool (*compare)(const T& a, const T& b)) {
+void SegmentedDeque<T>::sort(bool (*compare)(const T& a, const T& b)) {
     if (count <= 1) return;
 
-    Sequence<T>* left_seq = get_sub_sequence(0, count / 2 - 1);
-    Sequence<T>* right_seq = get_sub_sequence(count / 2, count - 1);
+    Sequence<T>* left_seq = this->get_sub_sequence(0, count / 2 - 1);
+    Sequence<T>* right_seq = this->get_sub_sequence(count / 2, count - 1);
 
-    SegmentDeque<T>* left_deque = dynamic_cast<SegmentDeque<T>*>(left_seq);
-    SegmentDeque<T>* right_deque = dynamic_cast<SegmentDeque<T>*>(right_seq);
+    SegmentedDeque<T>* left_deque = dynamic_cast<SegmentedDeque<T>*>(left_seq);
+    SegmentedDeque<T>* right_deque = dynamic_cast<SegmentedDeque<T>*>(right_seq);
 
     left_deque->sort(compare);
     right_deque->sort(compare);
 
-    SegmentDeque<T>* merged = left_deque->merge(right_deque, compare);
+    SegmentedDeque<T>* merged = left_deque->merge(right_deque, compare);
 
     while (count > 0) sys_pop_back();
 
@@ -504,8 +452,8 @@ void SegmentDeque<T>::sort(bool (*compare)(const T& a, const T& b)) {
 }
 
 template <class T>
-SegmentDeque<T>* SegmentDeque<T>::merge(const SegmentDeque<T>* other, bool (*compare)(const T& a, const T& b)) {
-    SegmentDeque<T>* merge_res = EmptyClone();
+SegmentedDeque<T>* SegmentedDeque<T>::merge(const SegmentedDeque<T>* other, bool (*compare)(const T& a, const T& b)) {
+    SegmentedDeque<T>* merge_res = EmptyClone();
 
     int this_idx = 0;
     int other_idx = 0;
@@ -547,32 +495,39 @@ SegmentDeque<T>* SegmentDeque<T>::merge(const SegmentDeque<T>* other, bool (*com
 }
 
 template <class T>
-int SegmentDeque<T>::find_sub_sequence(const Sequence<T>* sub) const {
-    int first_idx;
+int SegmentedDeque<T>::find_sub_sequence(const Sequence<T>* sub) const {
+    if (sub == nullptr) {
+        throw std::invalid_argument("Cannot find nullptr sub sequence");
+    }
 
-    for (int this_idx = 0; this_idx < count; this_idx++) {
-        first_idx = this_idx;
+    int sub_count = sub->get_count();
 
-        if (this_idx + sub->get_count() > count) {
-            break;
-        }
+    if (sub_count == 0) return 0;
+    if (sub_count > count) return -1;
 
+    for (int this_idx = 0; this_idx <= count - sub_count; this_idx++) {
         bool found = true;
-        for (int sub_idx = 0; sub_idx < sub->get_count(); sub_idx++) {
-            if (get(this_idx + sub_idx) != sub->get(sub_idx)) {
+        int offset = 0;
+
+        EnumeratorWrapper<T> sub_iter(sub->get_enumerator());
+
+        while (sub_iter.move_next()) {
+            if (!(get(this_idx + offset) == sub_iter.get_current())) {
                 found = false;
                 break;
             }
+
+            offset++;
         }
-        
-        if (found) return first_idx;
+
+        if (found) return this_idx;
     }
 
     return -1;
 }
 
 template <class T>
-void SegmentDeque<T>::reset_deque() {
+void SegmentedDeque<T>::reset_deque() {
     for (int index = 0; index < this->map_capacity; index++) {
         delete[] block_map.get(index);
     }
@@ -595,7 +550,7 @@ void SegmentDeque<T>::reset_deque() {
 }
 
 template <class T>
-SegmentDeque<T>::~SegmentDeque() {
+SegmentedDeque<T>::~SegmentedDeque() {
     for (int index = 0; index < map_capacity; index++) {
         delete[] block_map.get(index);
     }

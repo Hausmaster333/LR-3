@@ -1,6 +1,7 @@
 #include "deque/segment_deque.h"
 #include "types/complex.h"
 #include "types/person_types.h"
+#include "sorting_station/sorting_station.h"
 #include <gtest/gtest.h>
 #include <string>
 
@@ -14,12 +15,12 @@ bool greater_than(const int& a, const int& b) { return a > b; }
 
 // =================== Конструкторы
 
-TEST(SegmentDequeTest, DefaultConstructor) {
+TEST(SegmentedDequeTest, DefaultConstructor) {
     MutableSegmentedDeque<int> deque;
     EXPECT_EQ(deque.get_count(), 0);
 }
 
-TEST(SegmentDequeTest, ArrayConstructor) {
+TEST(SegmentedDequeTest, ArrayConstructor) {
     int items[] = {10, 20, 30, 40, 50};
     MutableSegmentedDeque<int> deque(items, 5);
 
@@ -31,12 +32,12 @@ TEST(SegmentDequeTest, ArrayConstructor) {
     EXPECT_EQ(deque.get(4), 50);
 }
 
-TEST(SegmentDequeTest, ArrayConstructorEmpty) {
+TEST(SegmentedDequeTest, ArrayConstructorEmpty) {
     MutableSegmentedDeque<int> deque(nullptr, 0);
     EXPECT_EQ(deque.get_count(), 0);
 }
 
-TEST(SegmentDequeTest, CopyConstructor) {
+TEST(SegmentedDequeTest, CopyConstructor) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> original(items, 3);
     MutableSegmentedDeque<int> copy(original);
@@ -52,7 +53,7 @@ TEST(SegmentDequeTest, CopyConstructor) {
     EXPECT_EQ(copy.get_count(), 3);
 }
 
-TEST(SegmentDequeTest, AssignmentOperator) {
+TEST(SegmentedDequeTest, AssignmentOperator) {
     int items1[] = {1, 2, 3};
     int items2[] = {10, 20};
     MutableSegmentedDeque<int> a(items1, 3);
@@ -69,7 +70,7 @@ TEST(SegmentDequeTest, AssignmentOperator) {
     EXPECT_EQ(b.get_count(), 3);
 }
 
-TEST(SegmentDequeTest, SelfAssignment) {
+TEST(SegmentedDequeTest, SelfAssignment) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> a(items, 3);
     a = a;
@@ -79,7 +80,7 @@ TEST(SegmentDequeTest, SelfAssignment) {
 
 // =================== push & pop
 
-TEST(SegmentDequeTest, PushBackSingle) {
+TEST(SegmentedDequeTest, PushBackSingle) {
     MutableSegmentedDeque<int> deque;
     deque.push_back(42);
 
@@ -87,7 +88,7 @@ TEST(SegmentDequeTest, PushBackSingle) {
     EXPECT_EQ(deque.get(0), 42);
 }
 
-TEST(SegmentDequeTest, PushFrontSingle) {
+TEST(SegmentedDequeTest, PushFrontSingle) {
     MutableSegmentedDeque<int> deque;
     deque.push_front(42);
 
@@ -95,7 +96,7 @@ TEST(SegmentDequeTest, PushFrontSingle) {
     EXPECT_EQ(deque.get(0), 42);
 }
 
-TEST(SegmentDequeTest, PushBackMultiple) {
+TEST(SegmentedDequeTest, PushBackMultiple) {
     MutableSegmentedDeque<int> deque;
     for (int i = 0; i < 20; i++) {
         deque.push_back(i);
@@ -107,7 +108,7 @@ TEST(SegmentDequeTest, PushBackMultiple) {
     }
 }
 
-TEST(SegmentDequeTest, PushFrontMultiple) {
+TEST(SegmentedDequeTest, PushFrontMultiple) {
     MutableSegmentedDeque<int> deque;
     for (int i = 0; i < 20; i++) {
         deque.push_front(i);
@@ -119,7 +120,7 @@ TEST(SegmentDequeTest, PushFrontMultiple) {
     }
 }
 
-TEST(SegmentDequeTest, PushBothEnds) {
+TEST(SegmentedDequeTest, PushBothEnds) {
     MutableSegmentedDeque<int> deque;
     deque.push_back(2);
     deque.push_back(3);
@@ -133,7 +134,7 @@ TEST(SegmentDequeTest, PushBothEnds) {
     EXPECT_EQ(deque.get(3), 3);
 }
 
-TEST(SegmentDequeTest, PopBackSingle) {
+TEST(SegmentedDequeTest, PopBackSingle) {
     MutableSegmentedDeque<int> deque;
     deque.push_back(42);
 
@@ -143,7 +144,7 @@ TEST(SegmentDequeTest, PopBackSingle) {
     EXPECT_EQ(deque.get_count(), 0);
 }
 
-TEST(SegmentDequeTest, PopFrontSingle) {
+TEST(SegmentedDequeTest, PopFrontSingle) {
     MutableSegmentedDeque<int> deque;
     deque.push_back(42);
 
@@ -153,7 +154,7 @@ TEST(SegmentDequeTest, PopFrontSingle) {
     EXPECT_EQ(deque.get_count(), 0);
 }
 
-TEST(SegmentDequeTest, PopBackMultiple) {
+TEST(SegmentedDequeTest, PopBackMultiple) {
     int items[] = {1, 2, 3, 4, 5};
     MutableSegmentedDeque<int> deque(items, 5);
 
@@ -165,7 +166,7 @@ TEST(SegmentDequeTest, PopBackMultiple) {
     EXPECT_EQ(deque.get_count(), 3);
 }
 
-TEST(SegmentDequeTest, PopFrontMultiple) {
+TEST(SegmentedDequeTest, PopFrontMultiple) {
     int items[] = {1, 2, 3, 4, 5};
     MutableSegmentedDeque<int> deque(items, 5);
 
@@ -178,7 +179,7 @@ TEST(SegmentDequeTest, PopFrontMultiple) {
     EXPECT_EQ(deque.get(0), 3);
 }
 
-TEST(SegmentDequeTest, PushPopInterleaved) {
+TEST(SegmentedDequeTest, PushPopInterleaved) {
     MutableSegmentedDeque<int> deque;
     deque.push_back(1);
     deque.push_back(2);
@@ -198,7 +199,7 @@ TEST(SegmentDequeTest, PushPopInterleaved) {
 }
 
 // Тест на переход через границу сегмента (segment_size = 8)
-TEST(SegmentDequeTest, PushAcrossSegmentBoundary) {
+TEST(SegmentedDequeTest, PushAcrossSegmentBoundary) {
     MutableSegmentedDeque<int> deque;
     // Добавляем больше элементов, чем помещается в один сегмент
     for (int i = 0; i < 25; i++) {
@@ -211,7 +212,7 @@ TEST(SegmentDequeTest, PushAcrossSegmentBoundary) {
     }
 }
 
-TEST(SegmentDequeTest, PushFrontAcrossSegmentBoundary) {
+TEST(SegmentedDequeTest, PushFrontAcrossSegmentBoundary) {
     MutableSegmentedDeque<int> deque;
     for (int i = 0; i < 25; i++) {
         deque.push_front(i);
@@ -225,7 +226,7 @@ TEST(SegmentDequeTest, PushFrontAcrossSegmentBoundary) {
 
 // =================== Геттеры
 
-TEST(SegmentDequeTest, GetFirstLast) {
+TEST(SegmentedDequeTest, GetFirstLast) {
     int items[] = {10, 20, 30};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -233,7 +234,7 @@ TEST(SegmentDequeTest, GetFirstLast) {
     EXPECT_EQ(deque.get_last(), 30);
 }
 
-TEST(SegmentDequeTest, GetByIndex) {
+TEST(SegmentedDequeTest, GetByIndex) {
     int items[] = {5, 10, 15, 20, 25};
     MutableSegmentedDeque<int> deque(items, 5);
 
@@ -242,7 +243,7 @@ TEST(SegmentDequeTest, GetByIndex) {
     }
 }
 
-TEST(SegmentDequeTest, TryGetValid) {
+TEST(SegmentedDequeTest, TryGetValid) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -258,7 +259,7 @@ TEST(SegmentDequeTest, TryGetValid) {
     EXPECT_EQ(mid.get_value(), 2);
 }
 
-TEST(SegmentDequeTest, TryGetEmpty) {
+TEST(SegmentedDequeTest, TryGetEmpty) {
     MutableSegmentedDeque<int> deque;
 
     Option<int> first = deque.try_get_first();
@@ -272,11 +273,11 @@ TEST(SegmentDequeTest, TryGetEmpty) {
 
 // =================== get_sub_sequence
 
-TEST(SegmentDequeTest, SubSequence) {
+TEST(SegmentedDequeTest, SubSequence) {
     int items[] = {10, 20, 30, 40, 50};
     MutableSegmentedDeque<int> deque(items, 5);
 
-    Sequence<int>* sub = deque.get_sub_sequence(1, 3);
+    MutableSegmentedDeque<int>* sub = deque.get_sub_sequence_defined(1, 3);
     EXPECT_EQ(sub->get_count(), 3);
     EXPECT_EQ(sub->get(0), 20);
     EXPECT_EQ(sub->get(1), 30);
@@ -284,22 +285,22 @@ TEST(SegmentDequeTest, SubSequence) {
     delete sub;
 }
 
-TEST(SegmentDequeTest, SubSequenceFullRange) {
+TEST(SegmentedDequeTest, SubSequenceFullRange) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
 
-    Sequence<int>* sub = deque.get_sub_sequence(0, 2);
+    MutableSegmentedDeque<int>* sub = deque.get_sub_sequence_defined(0, 2);
     EXPECT_EQ(sub->get_count(), 3);
     EXPECT_EQ(sub->get(0), 1);
     EXPECT_EQ(sub->get(2), 3);
     delete sub;
 }
 
-TEST(SegmentDequeTest, SubSequenceSingleElement) {
+TEST(SegmentedDequeTest, SubSequenceSingleElement) {
     int items[] = {10, 20, 30};
     MutableSegmentedDeque<int> deque(items, 3);
 
-    Sequence<int>* sub = deque.get_sub_sequence(1, 1);
+    MutableSegmentedDeque<int>* sub = deque.get_sub_sequence_defined(1, 1);
     EXPECT_EQ(sub->get_count(), 1);
     EXPECT_EQ(sub->get(0), 20);
     delete sub;
@@ -307,7 +308,7 @@ TEST(SegmentDequeTest, SubSequenceSingleElement) {
 
 // =================== append, prepend, insert
 
-TEST(SegmentDequeTest, Append) {
+TEST(SegmentedDequeTest, Append) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -316,7 +317,7 @@ TEST(SegmentDequeTest, Append) {
     EXPECT_EQ(deque.get(3), 4);
 }
 
-TEST(SegmentDequeTest, Prepend) {
+TEST(SegmentedDequeTest, Prepend) {
     int items[] = {2, 3, 4};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -326,7 +327,7 @@ TEST(SegmentDequeTest, Prepend) {
     EXPECT_EQ(deque.get(1), 2);
 }
 
-TEST(SegmentDequeTest, InsertAtBeginning) {
+TEST(SegmentedDequeTest, InsertAtBeginning) {
     int items[] = {2, 3, 4};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -336,7 +337,7 @@ TEST(SegmentDequeTest, InsertAtBeginning) {
     EXPECT_EQ(deque.get(1), 2);
 }
 
-TEST(SegmentDequeTest, InsertAtMiddle) {
+TEST(SegmentedDequeTest, InsertAtMiddle) {
     int items[] = {1, 2, 4, 5};
     MutableSegmentedDeque<int> deque(items, 4);
 
@@ -349,7 +350,7 @@ TEST(SegmentDequeTest, InsertAtMiddle) {
     EXPECT_EQ(deque.get(4), 5);
 }
 
-TEST(SegmentDequeTest, InsertAtEnd) {
+TEST(SegmentedDequeTest, InsertAtEnd) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -360,13 +361,13 @@ TEST(SegmentDequeTest, InsertAtEnd) {
 
 // =================== concat
 
-TEST(SegmentDequeTest, Concat) {
+TEST(SegmentedDequeTest, Concat) {
     int items1[] = {1, 2, 3};
     int items2[] = {4, 5, 6};
     MutableSegmentedDeque<int> deque1(items1, 3);
     MutableSegmentedDeque<int> deque2(items2, 3);
 
-    Sequence<int>* result = deque1.concat(&deque2);
+    MutableSegmentedDeque<int>* result = deque1.concat_defined(&deque2);
     EXPECT_EQ(result->get_count(), 6);
     for (int i = 0; i < 6; i++) {
         EXPECT_EQ(result->get(i), i + 1);
@@ -374,7 +375,7 @@ TEST(SegmentDequeTest, Concat) {
     delete result;
 }
 
-TEST(SegmentDequeTest, ConcatWithEmpty) {
+TEST(SegmentedDequeTest, ConcatWithEmpty) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
     MutableSegmentedDeque<int> empty;
@@ -386,11 +387,11 @@ TEST(SegmentDequeTest, ConcatWithEmpty) {
 
 // =================== mar, where, reduce
 
-TEST(SegmentDequeTest, Map) {
+TEST(SegmentedDequeTest, Map) {
     int items[] = {1, 2, 3, 4};
     MutableSegmentedDeque<int> deque(items, 4);
 
-    Sequence<int>* result = deque.map(double_val);
+    MutableSegmentedDeque<int>* result = deque.map_defined(double_val);
     EXPECT_EQ(result->get_count(), 4);
     EXPECT_EQ(result->get(0), 2);
     EXPECT_EQ(result->get(1), 4);
@@ -399,22 +400,22 @@ TEST(SegmentDequeTest, Map) {
     delete result;
 }
 
-TEST(SegmentDequeTest, MapSquare) {
+TEST(SegmentedDequeTest, MapSquare) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
 
-    Sequence<int>* result = deque.map(square);
+    MutableSegmentedDeque<int>* result = deque.map_defined(square);
     EXPECT_EQ(result->get(0), 1);
     EXPECT_EQ(result->get(1), 4);
     EXPECT_EQ(result->get(2), 9);
     delete result;
 }
 
-TEST(SegmentDequeTest, Where) {
+TEST(SegmentedDequeTest, Where) {
     int items[] = {1, 2, 3, 4, 5, 6};
     MutableSegmentedDeque<int> deque(items, 6);
 
-    Sequence<int>* result = deque.where(is_even);
+    MutableSegmentedDeque<int>* result = deque.where_defined(is_even);
     EXPECT_EQ(result->get_count(), 3);
     EXPECT_EQ(result->get(0), 2);
     EXPECT_EQ(result->get(1), 4);
@@ -422,7 +423,7 @@ TEST(SegmentDequeTest, Where) {
     delete result;
 }
 
-TEST(SegmentDequeTest, WhereNoneMatch) {
+TEST(SegmentedDequeTest, WhereNoneMatch) {
     int items[] = {-1, -2, -3};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -431,7 +432,7 @@ TEST(SegmentDequeTest, WhereNoneMatch) {
     delete result;
 }
 
-TEST(SegmentDequeTest, Reduce) {
+TEST(SegmentedDequeTest, Reduce) {
     int items[] = {1, 2, 3, 4, 5};
     MutableSegmentedDeque<int> deque(items, 5);
 
@@ -439,7 +440,7 @@ TEST(SegmentDequeTest, Reduce) {
     EXPECT_EQ(result, 15);
 }
 
-TEST(SegmentDequeTest, ReduceSingleElement) {
+TEST(SegmentedDequeTest, ReduceSingleElement) {
     int items[] = {42};
     MutableSegmentedDeque<int> deque(items, 1);
 
@@ -447,7 +448,7 @@ TEST(SegmentDequeTest, ReduceSingleElement) {
     EXPECT_EQ(result, 42);
 }
 
-TEST(SegmentDequeTest, ReduceEmpty) {
+TEST(SegmentedDequeTest, ReduceEmpty) {
     MutableSegmentedDeque<int> deque;
 
     int result = deque.reduce(add, 100);
@@ -456,7 +457,7 @@ TEST(SegmentDequeTest, ReduceEmpty) {
 
 // =================== sort
 
-TEST(SegmentDequeTest, SortAscending) {
+TEST(SegmentedDequeTest, SortAscending) {
     int items[] = {5, 2, 8, 1, 9, 3};
     MutableSegmentedDeque<int> deque(items, 6);
 
@@ -469,7 +470,7 @@ TEST(SegmentDequeTest, SortAscending) {
     EXPECT_EQ(deque.get(5), 9);
 }
 
-TEST(SegmentDequeTest, SortDescending) {
+TEST(SegmentedDequeTest, SortDescending) {
     int items[] = {5, 2, 8, 1, 9, 3};
     MutableSegmentedDeque<int> deque(items, 6);
 
@@ -482,7 +483,7 @@ TEST(SegmentDequeTest, SortDescending) {
     EXPECT_EQ(deque.get(5), 1);
 }
 
-TEST(SegmentDequeTest, SortAlreadySorted) {
+TEST(SegmentedDequeTest, SortAlreadySorted) {
     int items[] = {1, 2, 3, 4, 5};
     MutableSegmentedDeque<int> deque(items, 5);
 
@@ -492,7 +493,7 @@ TEST(SegmentDequeTest, SortAlreadySorted) {
     }
 }
 
-TEST(SegmentDequeTest, SortSingleElement) {
+TEST(SegmentedDequeTest, SortSingleElement) {
     int items[] = {42};
     MutableSegmentedDeque<int> deque(items, 1);
 
@@ -500,7 +501,7 @@ TEST(SegmentDequeTest, SortSingleElement) {
     EXPECT_EQ(deque.get(0), 42);
 }
 
-TEST(SegmentDequeTest, SortWithDuplicates) {
+TEST(SegmentedDequeTest, SortWithDuplicates) {
     int items[] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
     MutableSegmentedDeque<int> deque(items, 10);
 
@@ -519,13 +520,13 @@ TEST(SegmentDequeTest, SortWithDuplicates) {
 
 // =================== merge
 
-TEST(SegmentDequeTest, MergeSorted) {
+TEST(SegmentedDequeTest, MergeSorted) {
     int items1[] = {1, 3, 5, 7};
     int items2[] = {2, 4, 6, 8};
     MutableSegmentedDeque<int> deque1(items1, 4);
     MutableSegmentedDeque<int> deque2(items2, 4);
 
-    SegmentDeque<int>* merged = deque1.merge(&deque2);
+    SegmentedDeque<int>* merged = deque1.merge(&deque2);
     EXPECT_EQ(merged->get_count(), 8);
     for (int i = 0; i < 8; i++) {
         EXPECT_EQ(merged->get(i), i + 1);
@@ -533,13 +534,13 @@ TEST(SegmentDequeTest, MergeSorted) {
     delete merged;
 }
 
-TEST(SegmentDequeTest, MergeDifferentSizes) {
+TEST(SegmentedDequeTest, MergeDifferentSizes) {
     int items1[] = {1, 5};
     int items2[] = {2, 3, 4, 6, 7};
     MutableSegmentedDeque<int> deque1(items1, 2);
     MutableSegmentedDeque<int> deque2(items2, 5);
 
-    SegmentDeque<int>* merged = deque1.merge(&deque2);
+    SegmentedDeque<int>* merged = deque1.merge(&deque2);
     EXPECT_EQ(merged->get_count(), 7);
     for (int i = 0; i < 7; i++) {
         EXPECT_EQ(merged->get(i), i + 1);
@@ -547,12 +548,12 @@ TEST(SegmentDequeTest, MergeDifferentSizes) {
     delete merged;
 }
 
-TEST(SegmentDequeTest, MergeWithEmpty) {
+TEST(SegmentedDequeTest, MergeWithEmpty) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
     MutableSegmentedDeque<int> empty;
 
-    SegmentDeque<int>* merged = deque.merge(&empty);
+    SegmentedDeque<int>* merged = deque.merge(&empty);
     EXPECT_EQ(merged->get_count(), 3);
     EXPECT_EQ(merged->get(0), 1);
     delete merged;
@@ -560,7 +561,7 @@ TEST(SegmentDequeTest, MergeWithEmpty) {
 
 // =================== Первое вхождение подпоследовательности
 
-TEST(SegmentDequeTest, FindSubSequenceFound) {
+TEST(SegmentedDequeTest, FindSubSequenceFound) {
     int items[] = {1, 2, 3, 4, 5, 6};
     int sub_items[] = {3, 4, 5};
     MutableSegmentedDeque<int> deque(items, 6);
@@ -569,7 +570,7 @@ TEST(SegmentDequeTest, FindSubSequenceFound) {
     EXPECT_EQ(deque.find_sub_sequence(&sub), 2);
 }
 
-TEST(SegmentDequeTest, FindSubSequenceAtStart) {
+TEST(SegmentedDequeTest, FindSubSequenceAtStart) {
     int items[] = {1, 2, 3, 4, 5};
     int sub_items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 5);
@@ -578,7 +579,7 @@ TEST(SegmentDequeTest, FindSubSequenceAtStart) {
     EXPECT_EQ(deque.find_sub_sequence(&sub), 0);
 }
 
-TEST(SegmentDequeTest, FindSubSequenceAtEnd) {
+TEST(SegmentedDequeTest, FindSubSequenceAtEnd) {
     int items[] = {1, 2, 3, 4, 5};
     int sub_items[] = {4, 5};
     MutableSegmentedDeque<int> deque(items, 5);
@@ -587,7 +588,7 @@ TEST(SegmentDequeTest, FindSubSequenceAtEnd) {
     EXPECT_EQ(deque.find_sub_sequence(&sub), 3);
 }
 
-TEST(SegmentDequeTest, FindSubSequenceNotFound) {
+TEST(SegmentedDequeTest, FindSubSequenceNotFound) {
     int items[] = {1, 2, 3, 4, 5};
     int sub_items[] = {2, 4};
     MutableSegmentedDeque<int> deque(items, 5);
@@ -596,7 +597,7 @@ TEST(SegmentDequeTest, FindSubSequenceNotFound) {
     EXPECT_EQ(deque.find_sub_sequence(&sub), -1);
 }
 
-TEST(SegmentDequeTest, FindSubSequenceSingleElement) {
+TEST(SegmentedDequeTest, FindSubSequenceSingleElement) {
     int items[] = {1, 2, 3};
     int sub_items[] = {2};
     MutableSegmentedDeque<int> deque(items, 3);
@@ -607,21 +608,21 @@ TEST(SegmentDequeTest, FindSubSequenceSingleElement) {
 
 // =================== Исключения
 
-TEST(SegmentDequeTest, GetFromEmptyThrows) {
+TEST(SegmentedDequeTest, GetFromEmptyThrows) {
     MutableSegmentedDeque<int> deque;
     EXPECT_THROW(deque.get_first(), std::out_of_range);
     EXPECT_THROW(deque.get_last(), std::out_of_range);
     EXPECT_THROW(deque.get(0), std::out_of_range);
 }
 
-TEST(SegmentDequeTest, PopFromEmptyThrows) {
+TEST(SegmentedDequeTest, PopFromEmptyThrows) {
     MutableSegmentedDeque<int> deque;
     int result;
     EXPECT_THROW(deque.pop_back(&result), std::out_of_range);
     EXPECT_THROW(deque.pop_front(&result), std::out_of_range);
 }
 
-TEST(SegmentDequeTest, GetOutOfRangeThrows) {
+TEST(SegmentedDequeTest, GetOutOfRangeThrows) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
     EXPECT_THROW(deque.get(-1), std::out_of_range);
@@ -629,7 +630,7 @@ TEST(SegmentDequeTest, GetOutOfRangeThrows) {
     EXPECT_THROW(deque.get(100), std::out_of_range);
 }
 
-TEST(SegmentDequeTest, SubSequenceInvalidRangeThrows) {
+TEST(SegmentedDequeTest, SubSequenceInvalidRangeThrows) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
     EXPECT_THROW(deque.get_sub_sequence(-1, 2), std::out_of_range);
@@ -637,7 +638,7 @@ TEST(SegmentDequeTest, SubSequenceInvalidRangeThrows) {
     EXPECT_THROW(deque.get_sub_sequence(2, 1), std::out_of_range);
 }
 
-TEST(SegmentDequeTest, InsertAtInvalidIndexThrows) {
+TEST(SegmentedDequeTest, InsertAtInvalidIndexThrows) {
     int items[] = {1, 2, 3};
     MutableSegmentedDeque<int> deque(items, 3);
     EXPECT_THROW(deque.insert_at(0, -1), std::out_of_range);
@@ -646,7 +647,7 @@ TEST(SegmentDequeTest, InsertAtInvalidIndexThrows) {
 
 // =================== Граничные случаи
 
-TEST(SegmentDequeTest, PushPopUntilEmpty) {
+TEST(SegmentedDequeTest, PushPopUntilEmpty) {
     MutableSegmentedDeque<int> deque;
     for (int i = 0; i < 10; i++) {
         deque.push_back(i);
@@ -660,7 +661,7 @@ TEST(SegmentDequeTest, PushPopUntilEmpty) {
     EXPECT_EQ(deque.get_count(), 0);
 }
 
-TEST(SegmentDequeTest, PushPopAlternating) {
+TEST(SegmentedDequeTest, PushPopAlternating) {
     MutableSegmentedDeque<int> deque;
     int result;
 
@@ -677,7 +678,7 @@ TEST(SegmentDequeTest, PushPopAlternating) {
     EXPECT_EQ(result, 49);
 }
 
-TEST(SegmentDequeTest, LargeDeque) {
+TEST(SegmentedDequeTest, LargeDeque) {
     MutableSegmentedDeque<int> deque;
     int n = 1000;
 
@@ -696,30 +697,30 @@ TEST(SegmentDequeTest, LargeDeque) {
 
 // =================== Immutable
 
-TEST(SegmentDequeTest, ImmutablePushBackReturnsNew) {
+TEST(SegmentedDequeTest, ImmutablePushBackReturnsNew) {
     int items[] = {1, 2, 3};
     ImmutableSegmentedDeque<int> deque(items, 3);
 
-    SegmentDeque<int>* result = deque.push_back(4);
+    SegmentedDeque<int>* result = deque.push_back(4);
     EXPECT_EQ(deque.get_count(), 3);     // Оригинал не изменился
     EXPECT_EQ(result->get_count(), 4);   // Новый дек с 4 элементами
     EXPECT_EQ(result->get(3), 4);
     delete result;
 }
 
-TEST(SegmentDequeTest, ImmutablePopFrontReturnsNew) {
+TEST(SegmentedDequeTest, ImmutablePopFrontReturnsNew) {
     int items[] = {1, 2, 3};
     ImmutableSegmentedDeque<int> deque(items, 3);
 
     int val;
-    SegmentDeque<int>* result = deque.pop_front(&val);
+    SegmentedDeque<int>* result = deque.pop_front(&val);
     EXPECT_EQ(val, 1);
     EXPECT_EQ(deque.get_count(), 3);     // Оригинал не изменился
     EXPECT_EQ(result->get_count(), 2);
     delete result;
 }
 
-TEST(SegmentDequeTest, ImmutableAppendReturnsNew) {
+TEST(SegmentedDequeTest, ImmutableAppendReturnsNew) {
     int items[] = {1, 2};
     ImmutableSegmentedDeque<int> deque(items, 2);
 
@@ -731,7 +732,7 @@ TEST(SegmentDequeTest, ImmutableAppendReturnsNew) {
 
 // =================== Работа с Complex
 
-TEST(SegmentDequeTest, ComplexType) {
+TEST(SegmentedDequeTest, ComplexType) {
     Complex items[] = {Complex(1, 2), Complex(3, 4), Complex(5, 6)};
     MutableSegmentedDeque<Complex> deque(items, 3);
 
@@ -741,7 +742,7 @@ TEST(SegmentDequeTest, ComplexType) {
     EXPECT_EQ(deque.get(2), Complex(5, 6));
 }
 
-TEST(SegmentDequeTest, ComplexSort) {
+TEST(SegmentedDequeTest, ComplexSort) {
     // Модули: sqrt(9+16)=5, sqrt(1+1)≈1.41, sqrt(9+1)≈3.16
     Complex items[] = {Complex(3, 4), Complex(1, 1), Complex(3, 1)};
     MutableSegmentedDeque<Complex> deque(items, 3);
@@ -752,7 +753,7 @@ TEST(SegmentDequeTest, ComplexSort) {
     EXPECT_EQ(deque.get(2), Complex(3, 4));   // модуль 5
 }
 
-TEST(SegmentDequeTest, ComplexFindSubSequence) {
+TEST(SegmentedDequeTest, ComplexFindSubSequence) {
     Complex items[] = {Complex(1, 0), Complex(2, 0), Complex(3, 0), Complex(4, 0)};
     Complex sub_items[] = {Complex(2, 0), Complex(3, 0)};
     MutableSegmentedDeque<Complex> deque(items, 4);
@@ -763,7 +764,7 @@ TEST(SegmentDequeTest, ComplexFindSubSequence) {
 
 // =================== Работа со string
 
-TEST(SegmentDequeTest, StringType) {
+TEST(SegmentedDequeTest, StringType) {
     std::string items[] = {"hello", "world", "foo"};
     MutableSegmentedDeque<std::string> deque(items, 3);
 
@@ -779,7 +780,7 @@ TEST(SegmentDequeTest, StringType) {
     EXPECT_EQ(deque.get_last(), "end");
 }
 
-TEST(SegmentDequeTest, StringSort) {
+TEST(SegmentedDequeTest, StringSort) {
     std::string items[] = {"banana", "apple", "cherry"};
     MutableSegmentedDeque<std::string> deque(items, 3);
 
@@ -791,7 +792,7 @@ TEST(SegmentDequeTest, StringSort) {
 
 // =================== Работа с Person, Teacher, Student
 
-TEST(SegmentDequeTest, PersonDeque) {
+TEST(SegmentedDequeTest, PersonDeque) {
     Person p1(Person_ID{1, 100}, (char*)"Ivan", (char*)"Ivanovich", (char*)"Ivanov");
     Person p2(Person_ID{2, 200}, (char*)"Petr", (char*)"Petrovich", (char*)"Petrov");
     Person p3(Person_ID{1, 100}, (char*)"Ivan", (char*)"Ivanovich", (char*)"Ivanov");
@@ -806,7 +807,7 @@ TEST(SegmentDequeTest, PersonDeque) {
     EXPECT_TRUE(deque.get(0) == p3); // одинаковые id
 }
  
-TEST(SegmentDequeTest, PersonSort) {
+TEST(SegmentedDequeTest, PersonSort) {
     Person p1(Person_ID{3, 100}, (char*)"C", (char*)"C", (char*)"C");
     Person p2(Person_ID{1, 200}, (char*)"A", (char*)"A", (char*)"A");
     Person p3(Person_ID{2, 300}, (char*)"B", (char*)"B", (char*)"B");
@@ -822,7 +823,7 @@ TEST(SegmentDequeTest, PersonSort) {
     EXPECT_TRUE(deque.get(2) == p1); // id{3, 100}
 }
  
-TEST(SegmentDequeTest, PersonCopyIndependence) {
+TEST(SegmentedDequeTest, PersonCopyIndependence) {
     Person p1(Person_ID{1, 100}, (char*)"Ivan", (char*)"Ivanovich", (char*)"Ivanov");
  
     MutableSegmentedDeque<Person> deque;
@@ -838,7 +839,7 @@ TEST(SegmentDequeTest, PersonCopyIndependence) {
     EXPECT_EQ(copy.get_count(), 1); // копия не изменилась
 }
  
-TEST(SegmentDequeTest, StudentDeque) {
+TEST(SegmentedDequeTest, StudentDeque) {
     Student s1(Person_ID{1, 100}, (char*)"Ivan", (char*)"I", (char*)"Ivanov", 12345, (char*)"M3100");
     Student s2(Person_ID{2, 200}, (char*)"Petr", (char*)"P", (char*)"Petrov", 67890, (char*)"M3101");
  
@@ -851,7 +852,7 @@ TEST(SegmentDequeTest, StudentDeque) {
     EXPECT_EQ(deque.get(1).get_grade_book_num(), 67890);
 }
  
-TEST(SegmentDequeTest, StudentPopFront) {
+TEST(SegmentedDequeTest, StudentPopFront) {
     Student s1(Person_ID{1, 100}, (char*)"Ivan", (char*)"I", (char*)"Ivanov", 111, (char*)"G1");
     Student s2(Person_ID{2, 200}, (char*)"Petr", (char*)"P", (char*)"Petrov", 222, (char*)"G2");
  
@@ -865,7 +866,7 @@ TEST(SegmentDequeTest, StudentPopFront) {
     EXPECT_EQ(deque.get_count(), 1);
 }
  
-TEST(SegmentDequeTest, TeacherDeque) {
+TEST(SegmentedDequeTest, TeacherDeque) {
     Teacher t1(Person_ID{1, 100}, (char*)"Anna", (char*)"A", (char*)"Sidorova", 10, (char*)"Professor");
     Teacher t2(Person_ID{2, 200}, (char*)"Boris", (char*)"B", (char*)"Borisov", 20, (char*)"Docent");
  
@@ -878,7 +879,7 @@ TEST(SegmentDequeTest, TeacherDeque) {
     EXPECT_EQ(deque.get(1).get_depart_num(), 20);
 }
  
-TEST(SegmentDequeTest, TeacherFindSubSequence) {
+TEST(SegmentedDequeTest, TeacherFindSubSequence) {
     Teacher t1(Person_ID{1, 100}, (char*)"A", (char*)"A", (char*)"A", 10, (char*)"Prof");
     Teacher t2(Person_ID{2, 200}, (char*)"B", (char*)"B", (char*)"B", 20, (char*)"Doc");
     Teacher t3(Person_ID{3, 300}, (char*)"C", (char*)"C", (char*)"C", 30, (char*)"Asst");
@@ -902,7 +903,7 @@ int inc2(int x) { return x + 2; }
 int inc3(int x) { return x + 3; }
 int mul2(int x) { return x * 2; }
  
-TEST(SegmentDequeTest, FunctionPointerDeque) {
+TEST(SegmentedDequeTest, FunctionPointerDeque) {
     MutableSegmentedDeque<int(*)(int)> deque;
     deque.push_back(&inc1);
     deque.push_back(&inc2);
@@ -921,7 +922,7 @@ TEST(SegmentDequeTest, FunctionPointerDeque) {
     EXPECT_EQ(f(0), 3);
 }
  
-TEST(SegmentDequeTest, FunctionPointerApplyAll) {
+TEST(SegmentedDequeTest, FunctionPointerApplyAll) {
     MutableSegmentedDeque<int(*)(int)> deque;
     deque.push_back(&inc1);
     deque.push_back(&mul2);
@@ -937,7 +938,7 @@ TEST(SegmentDequeTest, FunctionPointerApplyAll) {
     }
 }
  
-TEST(SegmentDequeTest, FunctionPointerPushPopFront) {
+TEST(SegmentedDequeTest, FunctionPointerPushPopFront) {
     MutableSegmentedDeque<int(*)(int)> deque;
     deque.push_back(&inc1);
     deque.push_back(&inc2);
@@ -954,7 +955,7 @@ TEST(SegmentDequeTest, FunctionPointerPushPopFront) {
     EXPECT_EQ(deque.get_count(), 2);
 }
  
-TEST(SegmentDequeTest, FunctionPointerFindSubSequence) {
+TEST(SegmentedDequeTest, FunctionPointerFindSubSequence) {
     MutableSegmentedDeque<int(*)(int)> deque;
     deque.push_back(&inc1);
     deque.push_back(&inc2);
@@ -968,7 +969,7 @@ TEST(SegmentDequeTest, FunctionPointerFindSubSequence) {
     EXPECT_EQ(deque.find_sub_sequence(&sub), 1);
 }
  
-TEST(SegmentDequeTest, FunctionPointerEquality) {
+TEST(SegmentedDequeTest, FunctionPointerEquality) {
     MutableSegmentedDeque<int(*)(int)> deque;
     deque.push_back(&inc1);
     deque.push_back(&inc1); // дубликат
@@ -977,7 +978,7 @@ TEST(SegmentDequeTest, FunctionPointerEquality) {
     EXPECT_EQ(deque.get(0), deque.get(1));
 }
  
-TEST(SegmentDequeTest, FunctionPointerConcat) {
+TEST(SegmentedDequeTest, FunctionPointerConcat) {
     MutableSegmentedDeque<int(*)(int)> deque1;
     deque1.push_back(&inc1);
     deque1.push_back(&inc2);
@@ -986,7 +987,7 @@ TEST(SegmentDequeTest, FunctionPointerConcat) {
     deque2.push_back(&inc3);
     deque2.push_back(&mul2);
  
-    Sequence<int(*)(int)>* result = deque1.concat(&deque2);
+    MutableSegmentedDeque<int(*)(int)>* result = deque1.concat_defined(&deque2);
     EXPECT_EQ(result->get_count(), 4);
     EXPECT_EQ(result->get(0)(0), 1); // inc1
     EXPECT_EQ(result->get(1)(0), 2); // inc2
@@ -997,7 +998,7 @@ TEST(SegmentDequeTest, FunctionPointerConcat) {
 
 //  =================== Enumerator
 
-TEST(SegmentDequeTest, Enumerator) {
+TEST(SegmentedDequeTest, Enumerator) {
     int items[] = {10, 20, 30};
     MutableSegmentedDeque<int> deque(items, 3);
 
@@ -1014,7 +1015,7 @@ TEST(SegmentDequeTest, Enumerator) {
     delete iter;
 }
 
-TEST(SegmentDequeTest, EnumeratorReset) {
+TEST(SegmentedDequeTest, EnumeratorReset) {
     int items[] = {1, 2};
     MutableSegmentedDeque<int> deque(items, 2);
 
@@ -1026,4 +1027,108 @@ TEST(SegmentDequeTest, EnumeratorReset) {
     EXPECT_EQ(iter->get_current(), 1);
 
     delete iter;
+}
+
+// =================== Sorting station
+
+void expect_wagon(const MutableSegmentedDeque<Wagon>& train, int index, int type, int number) {
+    EXPECT_EQ(train.get(index).first(), type);
+    EXPECT_EQ(train.get(index).second(), number);
+}
+
+TEST(SortingStationTest, ExampleFromTask) {
+    MutableSegmentedDeque<Wagon> train;
+
+    train.push_back(Wagon(2, 1));
+    train.push_back(Wagon(3, 2));
+    train.push_back(Wagon(3, 3));
+    train.push_back(Wagon(1, 4));
+    train.push_back(Wagon(2, 5));
+    train.push_back(Wagon(3, 6));
+    train.push_back(Wagon(2, 7));
+    train.push_back(Wagon(1, 8));
+
+    MutableSegmentedDeque<Wagon> result = sort_train_by_type(train);
+
+    EXPECT_EQ(result.get_count(), 8);
+    expect_wagon(result, 0, 2, 1);
+    expect_wagon(result, 1, 2, 5);
+    expect_wagon(result, 2, 2, 7);
+    expect_wagon(result, 3, 3, 2);
+    expect_wagon(result, 4, 3, 3);
+    expect_wagon(result, 5, 3, 6);
+    expect_wagon(result, 6, 1, 4);
+    expect_wagon(result, 7, 1, 8);
+
+    EXPECT_EQ(count_wagon_types(train), 3);
+}
+
+TEST(SortingStationTest, OneTypeKeepsOriginalOrder) {
+    MutableSegmentedDeque<Wagon> train;
+
+    train.push_back(Wagon(1, 1));
+    train.push_back(Wagon(1, 2));
+    train.push_back(Wagon(1, 3));
+
+    MutableSegmentedDeque<Wagon> result = sort_train_by_type(train);
+
+    EXPECT_EQ(result.get_count(), 3);
+    expect_wagon(result, 0, 1, 1);
+    expect_wagon(result, 1, 1, 2);
+    expect_wagon(result, 2, 1, 3);
+
+    EXPECT_EQ(count_wagon_types(train), 1);
+}
+
+TEST(SortingStationTest, AlreadyGroupedTrainDoesNotChange) {
+    MutableSegmentedDeque<Wagon> train;
+
+    train.push_back(Wagon(2, 1));
+    train.push_back(Wagon(2, 2));
+    train.push_back(Wagon(3, 3));
+    train.push_back(Wagon(3, 4));
+    train.push_back(Wagon(1, 5));
+
+    MutableSegmentedDeque<Wagon> result = sort_train_by_type(train);
+
+    EXPECT_EQ(result.get_count(), 5);
+    expect_wagon(result, 0, 2, 1);
+    expect_wagon(result, 1, 2, 2);
+    expect_wagon(result, 2, 3, 3);
+    expect_wagon(result, 3, 3, 4);
+    expect_wagon(result, 4, 1, 5);
+
+    EXPECT_EQ(count_wagon_types(train), 3);
+}
+
+TEST(SortingStationTest, AlternatingTypesKeepNumbersInsideGroups) {
+    MutableSegmentedDeque<Wagon> train;
+
+    train.push_back(Wagon(1, 1));
+    train.push_back(Wagon(2, 2));
+    train.push_back(Wagon(1, 3));
+    train.push_back(Wagon(2, 4));
+    train.push_back(Wagon(1, 5));
+    train.push_back(Wagon(2, 6));
+
+    MutableSegmentedDeque<Wagon> result = sort_train_by_type(train);
+
+    EXPECT_EQ(result.get_count(), 6);
+    expect_wagon(result, 0, 1, 1);
+    expect_wagon(result, 1, 1, 3);
+    expect_wagon(result, 2, 1, 5);
+    expect_wagon(result, 3, 2, 2);
+    expect_wagon(result, 4, 2, 4);
+    expect_wagon(result, 5, 2, 6);
+
+    EXPECT_EQ(count_wagon_types(train), 2);
+}
+
+TEST(SortingStationTest, EmptyTrain) {
+    MutableSegmentedDeque<Wagon> train;
+
+    MutableSegmentedDeque<Wagon> result = sort_train_by_type(train);
+
+    EXPECT_EQ(result.get_count(), 0);
+    EXPECT_EQ(count_wagon_types(train), 0);
 }

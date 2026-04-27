@@ -14,7 +14,7 @@ bool check_is_active_cell(int checked_block, int checked_index, int front_block,
 };
 
 template <class U>
-void render_deque(const SegmentDeque<U>& deque) {
+void render_deque(const SegmentedDeque<U>& deque) {
     ImGui::Text("Front block: %d, index: %d", deque.front_block, deque.front_index);
     ImGui::Text("Back block: %d, index: %d", deque.back_block, deque.back_index);
     ImGui::Text("Map capacity: %d", deque.map_capacity);

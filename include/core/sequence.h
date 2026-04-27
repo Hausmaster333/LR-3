@@ -7,29 +7,30 @@
 
 template <class T>
 class Sequence {
+    protected:
+        virtual void sys_append(const T& item) = 0;
+        virtual Sequence<T>* sys_empty_clone() const = 0;
     public:
         virtual const T& get_first() const = 0; // const T& ссылка, чтобы не копировать объект, а просто const запрещает менять значение через эту ссылку
         virtual const T& get_last() const = 0;
-        virtual const T& get(int index) const = 0;
 
         virtual Option<T> try_get_first() const = 0;
         virtual Option<T> try_get_last() const = 0;
-        virtual Option<T> try_get(int index) const = 0;
 
         virtual int get_count() const = 0;
 
-        virtual Sequence<T>* get_sub_sequence(int start, int end) = 0;
+        virtual Sequence<T>* get_sub_sequence(int start, int end) const;
 
         virtual Sequence<T>* append(const T& item) = 0;
         virtual Sequence<T>* prepend(const T& item) = 0;
         virtual Sequence<T>* insert_at(const T& item, int index) = 0;
 
-        virtual Sequence<T>* concat(const Sequence<T>* other) = 0;
-        virtual Sequence<T>* map(T (*func)(const T& elem)) = 0;
-        virtual Sequence<T>* where(bool (*predicate)(const T& elem)) = 0;
-        virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) = 0;
+        virtual Sequence<T>* concat(const Sequence<T>* other) const;
+        virtual Sequence<T>* map(T (*func)(const T& elem)) const;
+        virtual Sequence<T>* where(bool (*predicate)(const T& elem)) const;
+        virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) const;
 
-        virtual Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
+        virtual Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr) const;
 
         virtual IEnumerator<T>* get_enumerator() const = 0;
 
@@ -43,42 +44,39 @@ class ArraySequence : public Sequence<T> {
     protected:    
         DynamicArray<T> array;
         int count;
+
+        void sys_append(const T& item) override;
+        Sequence<T>* sys_empty_clone() const override;
+
+        virtual ArraySequence<T>* Instance() = 0;
+        virtual ArraySequence<T>* EmptyClone() const = 0;
     public:
         ArraySequence();
         ArraySequence(const T* items, int count); // const items
         ArraySequence(const DynamicArray<T>& other);
         ArraySequence(const ArraySequence<T>& other);
 
-        virtual ArraySequence<T>* Instance() = 0;
-        virtual ArraySequence<T>* EmptyClone() = 0;
-
         const T& get_first() const override;
         const T& get_last() const override;
-        const T& get(int index) const override;
+        const T& get(int index) const;
 
         Option<T> try_get_first() const override;
         Option<T> try_get_last() const override;
-        Option<T> try_get(int index) const override;
+        Option<T> try_get(int index) const;
 
         int get_count() const override;
 
-        Sequence<T>* get_sub_sequence(int start, int end) override;
+        // Sequence<T>* get_sub_sequence(int start, int end) override;
 
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;
 
-        Sequence<T>* concat(const Sequence<T>* other) override;
-        Sequence<T>* map(T (*func)(const T& elem)) override;
-        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
-        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
-        // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
-
         IEnumerator<T>* get_enumerator() const override {
-            return array.get_enumerator();
+            return array.get_enumerator(count);
         }
 
-        ~ArraySequence() override {}
+        ~ArraySequence() {}
 };
 
 template <class T>
@@ -87,114 +85,125 @@ class ListSequence : public Sequence<T> {
     friend size_t measure_list_seq_memory(const ListSequence<U>& seq);
     protected:    
         LinkedList<T> list;
+
+        void sys_append(const T& item) override;
+        Sequence<T>* sys_empty_clone() const override;
+
+        virtual ListSequence<T>* Instance() = 0;
+        virtual ListSequence<T>* EmptyClone() const = 0;        
     public:
         ListSequence();
         ListSequence(const T* items, int count);
         ListSequence(const LinkedList<T>& other);
         ListSequence(const ListSequence<T>& other);
 
-        virtual ListSequence<T>* Instance() = 0;
-        virtual ListSequence<T>* EmptyClone() = 0;
-
         const T& get_first() const override;
         const T& get_last() const override;
-        const T& get(int index) const override;
 
         Option<T> try_get_first() const override;
         Option<T> try_get_last() const override;
-        Option<T> try_get(int index) const override;
 
         int get_count() const override;
 
-        Sequence<T>* get_sub_sequence(int start, int end) override;
+        // Sequence<T>* get_sub_sequence(int start, int end) override;
 
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;
 
-        Sequence<T>* concat(const Sequence<T>* other) override;
-        Sequence<T>* map(T (*func)(const T& elem)) override;
-        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
-        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
-        // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
-
         IEnumerator<T>* get_enumerator() const override {
             return list.get_enumerator();
         }
 
-        ~ListSequence() override {}
+        ~ListSequence() {}
 };
 
-template <class T>
-class MutableArraySequence : public ArraySequence<T> {
-    protected:        
-        ArraySequence<T>* Instance() override {
-            return this; // Возвращаем исходный объект
-        };
-
-        ArraySequence<T>* EmptyClone() override {
-            return new MutableArraySequence<T>();
-        };
-
-    public:
-        MutableArraySequence() : ArraySequence<T>() {};
-        MutableArraySequence(const T* items, int count) : ArraySequence<T>(items, count) {};
-        MutableArraySequence(const DynamicArray<T>& other) : ArraySequence<T>(other) {};
-        MutableArraySequence(const ArraySequence<T>& other) : ArraySequence<T>(other) {};
-};
-
-template <class T>
-class ImmutableArraySequence : public ArraySequence<T> {
+template <class T, class Derived, bool Mutable, template <class> class Base>
+class SequenceCRTP : public Base<T> {
     protected:
-        ArraySequence<T>* Instance() override {
-            return new ImmutableArraySequence<T>(*this); // Возвращаем копию(получаем объект -> отдаем по ссылке)
-        };
+        Base<T>* Instance() override {
+            if constexpr (Mutable) {
+                return this;
+            } else {
+                return new Derived(static_cast<const Derived&>(*this));
+            }
+        }
 
-        ArraySequence<T>* EmptyClone() override {
-            return new ImmutableArraySequence<T>();
-        };
-
+        Base<T>* EmptyClone() const override {
+            return new Derived();
+        }
     public:
-        ImmutableArraySequence() : ArraySequence<T>() {};
-        ImmutableArraySequence(const T* items, int count) : ArraySequence<T>(items, count) {};
-        ImmutableArraySequence(const DynamicArray<T>& other) : ArraySequence<T>(other) {};
-        ImmutableArraySequence(const ArraySequence<T>& other) : ArraySequence<T>(other) {};
-};
+        using Base<T>::Base;
 
-template <class T>
-class MutableListSequence : public ListSequence<T> {
-    protected:        
-        ListSequence<T>* Instance() override {
-            return this; // Возвращаем исходный объект
-        };
+        Derived* Clone() const {
+            return new Derived(static_cast<const Derived&>(*this));
+        }
 
-        ListSequence<T>* EmptyClone() override {
-            return new MutableListSequence<T>();
-        };
+        Derived* Empty() const {
+            return new Derived();
+        }
 
-    public:
-        MutableListSequence() : ListSequence<T>() {};
-        MutableListSequence(const T* items, int count) : ListSequence<T>(items, count) {};
-        MutableListSequence(const LinkedList<T>& other) : ListSequence<T>(other) {};
-        MutableListSequence(const ListSequence<T>& other) : ListSequence<T>(other) {};
-};
-
-template <class T>
-class ImmutableListSequence : public ListSequence<T> {
-    protected:
-        ListSequence<T>* Instance() override {
-            return new ImmutableListSequence<T>(*this); // Возвращаем копию(получаем объект -> отдаем по ссылке)
-        };
-
-        ListSequence<T>* EmptyClone() override {
-            return new ImmutableListSequence<T>();
-        };
+        Derived* map_defined(T (*func)(const T&)) const {
+            return static_cast<Derived*>(this->map(func));
+        }
         
+        Derived* where_defined(bool (*predicate)(const T&)) const {
+            return static_cast<Derived*>(this->where(predicate));
+        }
+
+        Derived* concat_defined(const Sequence<T>* other) const {
+            return static_cast<Derived*>(this->concat(other));
+        }
+
+        Derived* get_sub_sequence_defined(int start, int end) const {
+            return static_cast<Derived*>(this->get_sub_sequence(start, end));
+        }
+
+        Derived* slice_defined(int index, int count, const Sequence<T>* replace_seq = nullptr) const {
+            return static_cast<Derived*>(this->slice(index, count, replace_seq));
+        }
+
+        Derived& chain_append(const T& item) {
+            static_assert(Mutable, "chain_append is only available for Mutable sequences"); // Работает на этапе компиляции, поэтому используем его
+            this->append(item);
+            return *static_cast<Derived*>(this);
+        }
+
+        Derived& chain_prepend(const T& item) {
+            static_assert(Mutable, "chain_prepend is only available for Mutable sequences");
+            this->prepend(item);
+            return *static_cast<Derived*>(this);
+        }
+
+        Derived& chain_insert_at(const T& item, int index) {
+            static_assert(Mutable, "chain_insert_at is only available for Mutable sequences");
+            this->insert_at(item, index);
+            return *static_cast<Derived*>(this);
+        }
+};
+
+template <class T>
+class MutableArraySequence : public SequenceCRTP<T, MutableArraySequence<T>, true, ArraySequence> {
     public:
-        ImmutableListSequence() : ListSequence<T>() {};
-        ImmutableListSequence(const T* items, int count) : ListSequence<T>(items, count) {};
-        ImmutableListSequence(const LinkedList<T>& other) : ListSequence<T>(other) {};
-        ImmutableListSequence(const ListSequence<T>& other) : ListSequence<T>(other) {};
+        using SequenceCRTP<T, MutableArraySequence<T>, true, ArraySequence>::SequenceCRTP;
+};
+
+template <class T>
+class ImmutableArraySequence : public SequenceCRTP<T, ImmutableArraySequence<T>, false, ArraySequence> {
+    public:
+        using SequenceCRTP<T, ImmutableArraySequence<T>, false, ArraySequence>::SequenceCRTP;
+};
+
+template <class T>
+class MutableListSequence : public SequenceCRTP<T, MutableListSequence<T>, true, ListSequence> {
+    public:
+        using SequenceCRTP<T, MutableListSequence<T>, true, ListSequence>::SequenceCRTP;
+};
+
+template <class T>
+class ImmutableListSequence : public SequenceCRTP<T, ImmutableListSequence<T>, false, ListSequence> {
+    public:
+        using SequenceCRTP<T, ImmutableListSequence<T>, false, ListSequence>::SequenceCRTP;
 };
 
 #include "sequence.tpp"

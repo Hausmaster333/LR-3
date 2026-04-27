@@ -26,6 +26,23 @@ void BitSequence::set_bit(int index, bool value) {
     data.set(byte_index, byte);
 }
 
+void BitSequence::sys_append(const Bit& item) {
+    int new_count = bit_count + 1;
+    int new_bytes = check_bytes_needed(new_count);
+
+    if (new_bytes > data.get_size()) {
+        data.resize(new_bytes);
+        data.set(new_bytes - 1, 0);
+    }
+
+    bit_count = new_count;
+    set_bit(bit_count - 1, item.get());
+}
+
+Sequence<Bit>* BitSequence::sys_empty_clone() const {
+    return new BitSequence();
+}
+
 BitSequence::BitSequence() : bit_count(0), cached_bit(false) {
     data = DynamicArray<unsigned char>(0);
 }
@@ -95,28 +112,28 @@ int BitSequence::get_count() const {
     return bit_count;
 }
 
-Sequence<Bit>* BitSequence::get_sub_sequence(int start, int end) {
-    if (start < 0 || end < 0 || start >= bit_count || end >= bit_count || start > end) {
-        throw std::out_of_range("Index out of range");
-    }
+// Sequence<Bit>* BitSequence::get_sub_sequence(int start, int end) {
+//     if (start < 0 || end < 0 || start >= bit_count || end >= bit_count || start > end) {
+//         throw std::out_of_range("Index out of range");
+//     }
 
-    int new_count = end - start + 1;
+//     int new_count = end - start + 1;
 
-    BitSequence* result = new BitSequence();
-    result->data.resize(check_bytes_needed(new_count));
+//     BitSequence* result = new BitSequence();
+//     result->data.resize(check_bytes_needed(new_count));
 
-    for (int i = 0; i < check_bytes_needed(new_count); i++) {
-        result->data.set(i, 0);
-    }
+//     for (int i = 0; i < check_bytes_needed(new_count); i++) {
+//         result->data.set(i, 0);
+//     }
 
-    result->bit_count = new_count;
+//     result->bit_count = new_count;
 
-    for (int i = 0; i < new_count; i++) {
-        result->set_bit(i, get_bit(start + i));
-    }
+//     for (int i = 0; i < new_count; i++) {
+//         result->set_bit(i, get_bit(start + i));
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
 Sequence<Bit>* BitSequence::append(const Bit& item) {
     int new_count = bit_count + 1;
@@ -190,68 +207,6 @@ Sequence<Bit>* BitSequence::insert_at(const Bit& item, int index) {
 
     return this;
 }
-
-Sequence<Bit>* BitSequence::concat(const Sequence<Bit>* other) {
-    for (int i = 0; i < other->get_count(); i++) {
-        append(other->get(i));
-    }
-
-    return this;
-}
-
-Sequence<Bit>* BitSequence::map(Bit (*func)(const Bit& elem)) {
-    BitSequence* mapped_bit = new BitSequence();
-
-    for (int i = 0; i < bit_count; i++) {
-        Bit current_elem(get_bit(i));
-        mapped_bit->append(func(current_elem));
-    }
-
-    return mapped_bit;
-}
-
-Sequence<Bit>* BitSequence::where(bool (*predicate)(const Bit& elem)) {
-    BitSequence* where_bit = new BitSequence();
-
-    for (int i = 0; i < bit_count; i++) {
-        Bit current_elem(get_bit(i));
-
-        if (predicate(current_elem)) {
-            where_bit->append(current_elem);
-        }
-    }
-
-    return where_bit;
-}
-
-Bit BitSequence::reduce(Bit (*func)(const Bit& first_elem, const Bit& second_elem), const Bit& initial_elem) {
-    Bit reduced_elem = initial_elem;
-
-    for (int i = 0; i < bit_count; i++) {
-        Bit current_elem(get_bit(i));
-        reduced_elem = func(reduced_elem, current_elem);
-    }
-
-    return reduced_elem;
-}
-
-// Sequence<Sequence<Bit>*>* BitSequence::split(bool (*predicate)(const Bit&)) {
-//     auto* sequences = new MutableArraySequence<Sequence<Bit>*>();
-//     BitSequence* current_seq = new BitSequence();
-
-//     for (int i = 0; i < bit_count; i++) {
-//         Bit b(get_bit(i));
-//         if (predicate(b)) {
-//             sequences->append(current_seq);
-//             current_seq = new BitSequence();
-//         } else {
-//             current_seq->append(b);
-//         }
-//     }
-//     sequences->append(current_seq);
-
-//     return sequences;
-// }
 
 BitSequence* BitSequence::bit_and(const BitSequence& other) const {
     int min_count = (bit_count < other.bit_count) ? bit_count : other.bit_count;
