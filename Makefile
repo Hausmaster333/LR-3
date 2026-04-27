@@ -18,7 +18,11 @@ IMGUI_SRC = $(IMGUI_DIR)/imgui.cpp \
 IMPLOT_SRC = $(IMPLOT_DIR)/implot.cpp \
              $(IMPLOT_DIR)/implot_items.cpp
 
-GUI_LIBS = -lglfw3 -lopengl32 -lgdi32 -limm32
+ifeq ($(OS),Windows_NT)
+    GUI_LIBS = -lglfw3 -lopengl32 -lgdi32 -limm32
+else
+    GUI_LIBS = -lglfw -lGL -ldl -lpthread -lX11
+endif
 
 GTEST_DIR = googletest/googletest
 GTEST_FLAGS = -I$(GTEST_DIR)/include -I$(GTEST_DIR)
