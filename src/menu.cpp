@@ -876,7 +876,7 @@ void menu_merge() {
         int i2 = select_int_deque("Select second sorted deque:");
         if (i2 == -1) return;
 
-        SegmentDeque<int>* res = int_deques[i1]->merge(int_deques[i2]);
+        SegmentedDeque<int>* res = int_deques[i1]->merge(int_deques[i2]);
         MutableSegmentedDeque<int>* res_d = dynamic_cast<MutableSegmentedDeque<int>*>(res);
 
         std::cout << "Merged: "; 
@@ -895,7 +895,7 @@ void menu_merge() {
         int i2 = select_double_deque("Select second sorted deque:");
         if (i2 == -1) return;
 
-        SegmentDeque<double>* res = double_deques[i1]->merge(double_deques[i2]);
+        SegmentedDeque<double>* res = double_deques[i1]->merge(double_deques[i2]);
         MutableSegmentedDeque<double>* res_d = dynamic_cast<MutableSegmentedDeque<double>*>(res);
 
         std::cout << "Merged: "; 
