@@ -5,16 +5,52 @@
 #include "imgui.h"
 #include <chrono>
 #include <random>
-#include <windows.h>
-#include <psapi.h>
-#include <malloc.h>
+#include <thread>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #include <psapi.h>
+    #include <malloc.h>
+#else
+    #include <cstdio>
+    #include <unistd.h>
+    #include <malloc.h>
+#endif
 
 size_t get_process_memory() {
+#ifdef _WIN32
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
         return pmc.WorkingSetSize;  // байты физической памяти
     }
     return 0;
+#else
+    // /proc/self/statm: размеры в страницах, поля: size resident shared text lib data dt
+    FILE* f = std::fopen("/proc/self/statm", "r");
+    if (!f) return 0;
+    long total_pages = 0, rss_pages = 0;
+    if (std::fscanf(f, "%ld %ld", &total_pages, &rss_pages) != 2) {
+        std::fclose(f);
+        return 0;
+    }
+    std::fclose(f);
+    long page_size = sysconf(_SC_PAGESIZE);  // В среднем обычно 4096
+    return (size_t)rss_pages * (size_t)page_size;  // Байты физической памяти
+#endif
+}
+
+// Просим аллокатор вернуть свободные страницы ОС
+void heap_trim() {
+#ifdef _WIN32
+    heap_trim();
+#else
+    malloc_trim(0);  // glibc-расширение; на musl будет no-op
+#endif
+}
+
+// Кросс-платформенная пауза в миллисекундах
+void sleep_ms(int ms) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 template <class U>
@@ -184,7 +220,7 @@ void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_
     // Прогрев аллокатора — выделяем и освобождаем большой буфер
     void* warmup = malloc(10 * 1024 * 1024);  // 10 МБ
     if (warmup) free(warmup);
-    _heapmin();  // просим CRT вернуть свободные страницы ОС
+    heap_trim();  // просим аллокатор вернуть свободные страницы ОС
     
     int sizes[] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
     
@@ -192,8 +228,8 @@ void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_
         int n = sizes[s];
         
         // SegmentedDeque
-        _heapmin();
-        Sleep(50);  // даём ОС обновить статистику
+        heap_trim();
+        sleep_ms(50);  // даём ОС обновить статистику
         size_t before = get_process_memory();
         {
             MutableSegmentedDeque<int> deque;
@@ -203,8 +239,8 @@ void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_
         }
         
         // ArraySequence
-        _heapmin();
-        Sleep(50);
+        heap_trim();
+        sleep_ms(50);
         before = get_process_memory();
         {
             MutableArraySequence<int> arr;
@@ -214,8 +250,8 @@ void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_
         }
         
         // ListSequence
-        _heapmin();
-        Sleep(50);
+        heap_trim();
+        sleep_ms(50);
         before = get_process_memory();
         {
             MutableListSequence<int> list;
