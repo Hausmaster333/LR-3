@@ -19,10 +19,10 @@ struct StationStep {
     int siding_index; // индекс тупика; для PushToResult/PopFromTrain не используется
 };
 
+MutableSegmentedDeque<int> collect_types(const MutableSegmentedDeque<Wagon>& train);
+
 int count_wagon_types(const MutableSegmentedDeque<Wagon>& train);
 
 MutableSegmentedDeque<Wagon> sort_train_by_type(const MutableSegmentedDeque<Wagon>& train, MutableSegmentedDeque<StationStep>* steps = nullptr);
-
-MutableSegmentedDeque<int> collect_types(const MutableSegmentedDeque<Wagon>& train);
 
 #endif

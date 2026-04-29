@@ -12,6 +12,7 @@ class BitSequence : public Sequence<Bit> {
 
         bool get_bit(int index) const;
         void set_bit(int index, bool value);
+        void clear_unused_bits();
 
         static int check_bytes_needed(int n); // Количество байт, необходимое для хранения n бит
     protected:

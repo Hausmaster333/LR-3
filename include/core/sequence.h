@@ -28,7 +28,7 @@ class Sequence {
         virtual Sequence<T>* concat(const Sequence<T>* other) const;
         virtual Sequence<T>* map(T (*func)(const T& elem)) const;
         virtual Sequence<T>* where(bool (*predicate)(const T& elem)) const;
-        virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) const;
+        virtual T reduce(T (*func)(const T& accumulator, const T& current), const T& initial_elem) const;
 
         virtual Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr) const;
 
@@ -66,8 +66,6 @@ class ArraySequence : public Sequence<T> {
 
         int get_count() const override;
 
-        // Sequence<T>* get_sub_sequence(int start, int end) override;
-
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;
@@ -104,8 +102,6 @@ class ListSequence : public Sequence<T> {
         Option<T> try_get_last() const override;
 
         int get_count() const override;
-
-        // Sequence<T>* get_sub_sequence(int start, int end) override;
 
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;

@@ -1,6 +1,7 @@
 program
 hanoi.html
 .vscode
+googletest/
 # Prerequisites
 *.d
 *.ini

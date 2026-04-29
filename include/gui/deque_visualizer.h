@@ -5,10 +5,10 @@
 #include "deque/segment_deque.h"
 #include <chrono>
 
-bool check_is_active_cell(int checked_block, int checked_index, int front_block, int front_index, int back_block, int back_index) {
-    int total_checked_index = checked_block * 8 + checked_index;
-    int total_front_index = front_block * 8 + front_index;
-    int total_back_index = back_block * 8 + back_index;
+bool check_is_active_cell(int checked_block, int checked_index, int front_block, int front_index, int back_block, int back_index, int segment_size) {
+    int total_checked_index = checked_block * segment_size + checked_index;
+    int total_front_index = front_block * segment_size + front_index;
+    int total_back_index = back_block * segment_size + back_index;
 
     return (total_checked_index >= total_front_index && total_checked_index < total_back_index);
 };
@@ -30,7 +30,7 @@ void render_deque(const SegmentedDeque<U>& deque) {
         U* curr_block = deque.block_map.get(curr_block_index);
         float block_y = origin.y + curr_block_index * (cell_size + spacing);
 
-        for (int curr_cell_index = 0; curr_cell_index < 8; curr_cell_index++) {
+        for (int curr_cell_index = 0; curr_cell_index < deque.segment_size; curr_cell_index++) {
             float x = origin.x + curr_cell_index * (cell_size + spacing);
             float y = block_y;
 
@@ -40,7 +40,7 @@ void render_deque(const SegmentedDeque<U>& deque) {
             if (curr_block == nullptr) {
                 draw->AddRect(p1, p2, IM_COL32(100, 100, 100, 100));
             } else {
-                bool is_active = check_is_active_cell(curr_block_index, curr_cell_index, deque.front_block, deque.front_index, deque.back_block, deque.back_index);
+                bool is_active = check_is_active_cell(curr_block_index, curr_cell_index, deque.front_block, deque.front_index, deque.back_block, deque.back_index, deque.segment_size);
 
                 if (is_active) {
                     draw->AddRectFilled(p1, p2, IM_COL32(100, 200, 100, 255));
@@ -55,7 +55,7 @@ void render_deque(const SegmentedDeque<U>& deque) {
         }
     }
 
-    ImGui::Dummy(ImVec2(8 * (cell_size + spacing), deque.map_capacity * (cell_size + spacing)));
+    ImGui::Dummy(ImVec2(deque.segment_size * (cell_size + spacing), deque.map_capacity * (cell_size + spacing)));
 };
 
 #endif

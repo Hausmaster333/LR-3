@@ -2,6 +2,8 @@
 
 template <class T>
 Sequence<T>* Sequence<T>::slice(int index, int count, const Sequence<T>* replace_seq) const {
+    if (count < 0) throw std::invalid_argument("Slice count cannot be negative");
+
     int len = get_count();
 
     if (index < 0) {
@@ -16,33 +18,35 @@ Sequence<T>* Sequence<T>::slice(int index, int count, const Sequence<T>* replace
         count = len - index;
     }
 
-    auto* sliced_seq = new MutableArraySequence<T>();
+    Sequence<T>* sliced_seq = sys_empty_clone();
 
     // Элементы до index, и после index + count
     EnumeratorWrapper<T> iter(get_enumerator());
-    int i = 0;
+    int curr_idx = 0;
     while (iter.move_next()) {
-        if (i < index) {
-            sliced_seq->append(iter.get_current());
-        } else if (i == index && replace_seq != nullptr) {
-            // Вставляем replace seq один раз при достижении index
+        if (curr_idx < index) {
+            sliced_seq->sys_append(iter.get_current());
+        } else if (curr_idx == index && replace_seq != nullptr) {
+            // Вставляем replace_seq один раз при достижении index
             EnumeratorWrapper<T> rep_iter(replace_seq->get_enumerator());
 
             while (rep_iter.move_next()) {
-                sliced_seq->append(rep_iter.get_current());
+                sliced_seq->sys_append(rep_iter.get_current());
             }
         }
-        if (i >= index + count) {
-            sliced_seq->append(iter.get_current());
+        if (curr_idx >= index + count) {
+            sliced_seq->sys_append(iter.get_current());
         }
-        i++;
+        curr_idx++;
     }
 
     return sliced_seq;
 }
 
 template <class T>
-T Sequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) const {
+T Sequence<T>::reduce(T (*func)(const T& accumulator, const T& current), const T& initial_elem) const {
+    if (func == nullptr) throw std::invalid_argument("Cannot reduce with nullptr function");
+
     T reduced_elem = initial_elem;
 
     EnumeratorWrapper<T> iter(get_enumerator());
@@ -56,17 +60,21 @@ T Sequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), cons
 
 template <class T>
 Sequence<T>* Sequence<T>::map(T (*func)(const T& elem)) const {
-        Sequence<T>* result = sys_empty_clone();
+    if (func == nullptr) throw std::invalid_argument("Cannot map with nullptr function");
 
-        EnumeratorWrapper<T> iter(get_enumerator());
-        while (iter.move_next()) {
-            result->sys_append(func(iter.get_current()));
-        }
-        return result;
+    Sequence<T>* result = sys_empty_clone();
+
+    EnumeratorWrapper<T> iter(get_enumerator());
+    while (iter.move_next()) {
+        result->sys_append(func(iter.get_current()));
+    }
+    return result;
 }
 
 template <class T>
 Sequence<T>* Sequence<T>::where(bool (*predicate)(const T& elem)) const {
+    if (predicate == nullptr) throw std::invalid_argument("Cannot where with nullptr predicate");
+
     Sequence<T>* result = sys_empty_clone();
 
     EnumeratorWrapper<T> iter(get_enumerator());
@@ -81,9 +89,7 @@ Sequence<T>* Sequence<T>::where(bool (*predicate)(const T& elem)) const {
 
 template <class T>
 Sequence<T>* Sequence<T>::concat(const Sequence<T>* other) const {
-    if (other == nullptr) {
-        throw std::invalid_argument("Cannot concat with nullptr");
-    }
+    if (other == nullptr) throw std::invalid_argument("Cannot concat with nullptr");
 
     Sequence<T>* result = sys_empty_clone();
 
@@ -209,26 +215,6 @@ int ArraySequence<T>::get_count() const {
     return count;
 }
 
-// template <class T>
-// Sequence<T>* ArraySequence<T>::get_sub_sequence(int start, int end) {
-//     if (count == 0) throw std::out_of_range("Sequence is empty\n");
-
-//     if (start < 0 || end < 0 || start >= count || end >= count || start > end) throw std::out_of_range("Index out of range");
-
-//     ArraySequence<T>* sub_array = EmptyClone();
-
-//     int new_count = end - start + 1;
-//     sub_array->array.resize(new_count) ;
-
-//     for (int i = 0; i < new_count; i++) {
-//         T curr_elem = array.get(start + i);
-//         sub_array->array.set(i, curr_elem);
-//     }
-//     sub_array->count = new_count;
-
-//     return sub_array;
-// }
-
 template <class T>
 Sequence<T>* ArraySequence<T>::append(const T& item) {
     ArraySequence<T>* inst = Instance();
@@ -257,8 +243,8 @@ Sequence<T>* ArraySequence<T>::prepend(const T& item) {
         inst->array.resize(new_size);
     }
 
-    for (int i = inst->count; i > 0; i--) {
-        inst->array.set(i, inst->array.get(i - 1));
+    for (int idx = inst->count; idx > 0; idx--) {
+        inst->array.set(idx, inst->array.get(idx - 1));
     }
 
     inst->array.set(0, item);
@@ -281,8 +267,8 @@ Sequence<T>* ArraySequence<T>::insert_at(const T& item, int index) {
         inst->array.resize(new_size);
     }
 
-    for (int i = inst->count; i > index; i--) {
-        inst->array.set(i, inst->array.get(i - 1));
+    for (int idx = inst->count; idx > index; idx--) {
+        inst->array.set(idx, inst->array.get(idx - 1));
     }
 
     inst->array.set(index, item);
@@ -354,32 +340,6 @@ template <class T>
 int ListSequence<T>::get_count() const {
     return list.get_length();
 }
-
-// template <class T>
-// Sequence<T>* ListSequence<T>::get_sub_sequence(int start, int end) {
-//     if (start < 0 || end < 0 || start >= list.length || end >= list.length || start > end) {
-//         throw std::out_of_range("Index out of range");
-//     }
-
-//     ListSequence<T>* sub_list = EmptyClone();
-//     // LinkedList<T>* sub_list_inside = list.get_sub_list(start, end);
-
-//     EnumeratorWrapper<T> iter(get_enumerator());
-//     int curr_index = 0;
-//     while (iter.move_next()) {
-//         if (curr_index == start) {
-//             for (curr_index; curr_index <= end; curr_index++) {
-//                 sub_list->append(iter.get_current());
-//             }
-//         }
-//         curr_index++;
-//     }
-
-//     // sub_list->list = *sub_list_inside;
-//     // delete sub_list_inside;
-
-//     return sub_list;
-// }
 
 template <class T>
 Sequence<T>* ListSequence<T>::append(const T& item) {

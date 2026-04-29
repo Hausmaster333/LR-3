@@ -6,6 +6,9 @@
 
 template <class T>
 Sequence<Sequence<T>*>* split(const Sequence<T>* seq, bool (*predicate)(const T&)) {
+    if (seq == nullptr) throw std::invalid_argument("Cannot split nullptr sequence");
+    if (predicate == nullptr) throw std::invalid_argument("Cannot split with nullptr predicate");
+
     auto* sequences = new MutableArraySequence<Sequence<T>*>();
     auto* current_seq = new MutableArraySequence<T>();
 
@@ -25,18 +28,16 @@ Sequence<Sequence<T>*>* split(const Sequence<T>* seq, bool (*predicate)(const T&
 }
 
 template <class T1, class T2>
-Sequence<Pair<T1, T2>>* zip(const Sequence<T1>* a, const Sequence<T2>* b) {
-    if (a == nullptr || b == nullptr) {
-        throw std::invalid_argument("Cannot zip with nullptr");
-    }
+Sequence<Pair<T1, T2>>* zip(const Sequence<T1>* first_seq, const Sequence<T2>* second_seq) {
+    if (first_seq == nullptr || second_seq == nullptr) throw std::invalid_argument("Cannot zip with nullptr");
 
     auto* result = new MutableArraySequence<Pair<T1, T2>>();
 
-    EnumeratorWrapper<T1> a_iter(a->get_enumerator());
-    EnumeratorWrapper<T2> b_iter(b->get_enumerator());
+    EnumeratorWrapper<T1> first_seq_iter(first_seq->get_enumerator());
+    EnumeratorWrapper<T2> second_seq_iter(second_seq->get_enumerator());
 
-    while (a_iter.move_next() && b_iter.move_next()) {
-        result->append(Pair<T1, T2>(a_iter.get_current(), b_iter.get_current()));
+    while (first_seq_iter.move_next() && second_seq_iter.move_next()) {
+        result->append(Pair<T1, T2>(first_seq_iter.get_current(), second_seq_iter.get_current()));
     }
 
     return result;
@@ -44,38 +45,34 @@ Sequence<Pair<T1, T2>>* zip(const Sequence<T1>* a, const Sequence<T2>* b) {
 
 template <class T1, class T2>
 Pair<Sequence<T1>*, Sequence<T2>*> unzip(const Sequence<Pair<T1, T2>>* seq) {
-    if (seq == nullptr) {
-        throw std::invalid_argument("Cannot unzip nullptr");
-    }
+    if (seq == nullptr) throw std::invalid_argument("Cannot unzip nullptr");
 
     auto* first_seq = new MutableArraySequence<T1>();
     auto* second_seq = new MutableArraySequence<T2>();
 
     EnumeratorWrapper<Pair<T1, T2>> iter(seq->get_enumerator());
     while (iter.move_next()) {
-        const Pair<T1, T2>& p = iter.get_current();
+        const Pair<T1, T2>& curr_pair = iter.get_current();
 
-        first_seq->append(p.first());
-        second_seq->append(p.second());
+        first_seq->append(curr_pair.first());
+        second_seq->append(curr_pair.second());
     }
 
     return Pair<Sequence<T1>*, Sequence<T2>*>(first_seq, second_seq);
 }
 
 template <class T1, class T2, class T3>
-Sequence<Triple<T1, T2, T3>>* zip3(const Sequence<T1>* a, const Sequence<T2>* b, const Sequence<T3>* c) {
-    if (a == nullptr || b == nullptr || c == nullptr) {
-        throw std::invalid_argument("Cannot zip3 with nullptr");
-    }
+Sequence<Triple<T1, T2, T3>>* zip3(const Sequence<T1>* first_seq, const Sequence<T2>* second_seq, const Sequence<T3>* third_seq) {
+    if (first_seq == nullptr || second_seq == nullptr || third_seq == nullptr) throw std::invalid_argument("Cannot zip3 with nullptr");
 
     auto* result = new MutableArraySequence<Triple<T1, T2, T3>>();
 
-    EnumeratorWrapper<T1> a_iter(a->get_enumerator());
-    EnumeratorWrapper<T2> b_iter(b->get_enumerator());
-    EnumeratorWrapper<T3> c_iter(c->get_enumerator());
+    EnumeratorWrapper<T1> first_seq_iter(first_seq->get_enumerator());
+    EnumeratorWrapper<T2> second_seq_iter(second_seq->get_enumerator());
+    EnumeratorWrapper<T3> third_seq_iter(third_seq->get_enumerator());
 
-    while (a_iter.move_next() && b_iter.move_next() && c_iter.move_next()) {
-        result->append(Triple<T1, T2, T3>(a_iter.get_current(), b_iter.get_current(), c_iter.get_current()));
+    while (first_seq_iter.move_next() && second_seq_iter.move_next() && third_seq_iter.move_next()) {
+        result->append(Triple<T1, T2, T3>(first_seq_iter.get_current(), second_seq_iter.get_current(), third_seq_iter.get_current()));
     }
 
     return result;
@@ -83,9 +80,7 @@ Sequence<Triple<T1, T2, T3>>* zip3(const Sequence<T1>* a, const Sequence<T2>* b,
 
 template <class T1, class T2, class T3>
 Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip3(const Sequence<Triple<T1, T2, T3>>* seq) {
-    if (seq == nullptr) {
-        throw std::invalid_argument("Cannot unzip3 nullptr");
-    }
+    if (seq == nullptr) throw std::invalid_argument("Cannot unzip3 nullptr");
 
     auto* first_seq = new MutableArraySequence<T1>();
     auto* second_seq = new MutableArraySequence<T2>();
@@ -93,11 +88,11 @@ Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip3(const Sequence<Triple
 
     EnumeratorWrapper<Triple<T1, T2, T3>> iter(seq->get_enumerator());
     while (iter.move_next()) {
-        const Triple<T1, T2, T3>& t = iter.get_current();
+        const Triple<T1, T2, T3>& curr_triple = iter.get_current();
 
-        first_seq->append(t.first());
-        second_seq->append(t.second());
-        third_seq->append(t.third());
+        first_seq->append(curr_triple.first());
+        second_seq->append(curr_triple.second());
+        third_seq->append(curr_triple.third());
     }
 
     return Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*>(first_seq, second_seq, third_seq);

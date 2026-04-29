@@ -61,8 +61,6 @@ class SegmentedDeque: public Sequence<T> {
 
         int get_count() const override;
 
-        // Sequence<T>* get_sub_sequence(int start, int end) override;
-        
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;

@@ -4,6 +4,7 @@
 #include "deque/segment_deque.h"
 #include "imgui.h"
 #include <chrono>
+#include <cstdlib>
 #include <random>
 #include <thread>
 
@@ -16,6 +17,14 @@
     #include <unistd.h>
     #include <malloc.h>
 #endif
+
+struct BenchmarkParams {
+    const int* sizes;
+    int sizes_count; // Сколько элементов в массиве sizes(читай количество прогонов)
+    int get_accesses; // Сколько случайных обращений get(idx) делать для каждого size
+    size_t os_memory_warmup_bytes; // Прогреваем аллокатор(выделяем и освобождаем большой кусок памяти)
+    int os_memory_pause_ms; // Задержка, чтобы ОС успела обновить статистику памяти
+};
 
 size_t get_process_memory() {
 #ifdef _WIN32
@@ -42,13 +51,12 @@ size_t get_process_memory() {
 // Просим аллокатор вернуть свободные страницы ОС
 void heap_trim() {
 #ifdef _WIN32
-    heap_trim();
+    _heapmin();
 #else
-    malloc_trim(0);  // glibc-расширение; на musl будет no-op
+    malloc_trim(0);
 #endif
 }
 
-// Кросс-платформенная пауза в миллисекундах
 void sleep_ms(int ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
@@ -59,10 +67,10 @@ size_t measure_deque_memory(const SegmentedDeque<U>& deque) {
     size += deque.map_capacity * sizeof(U*);
     
     int allocated = 0;
-    for (int i = 0; i < deque.map_capacity; i++) {
-        if (deque.block_map.get(i) != nullptr) allocated++;
+    for (int idx = 0; idx < deque.map_capacity; idx++) {
+        if (deque.block_map.get(idx) != nullptr) allocated++;
     }
-    size += allocated * deque.segment_size * sizeof(U);  // 8 = segment_size
+    size += allocated * deque.segment_size * sizeof(U);
     
     return size;
 };
@@ -70,7 +78,8 @@ size_t measure_deque_memory(const SegmentedDeque<U>& deque) {
 template <class U>
 size_t measure_array_seq_memory(const ArraySequence<U>& dyn_array) {
     size_t size = sizeof(ArraySequence<U>);
-    size += dyn_array.array.get_size() * sizeof(U); // данные внутри массива
+    size += dyn_array.array.get_size() * sizeof(U); // Данные внутри массива
+
     return size;
 };
 
@@ -78,104 +87,103 @@ template <class U>
 size_t measure_list_seq_memory(const ListSequence<U>& linked_list) {
     size_t size = sizeof(ListSequence<U>);
     
-    // Каждый узел: данные T + указатель next
     int count = linked_list.list.get_length();
     size += count * linked_list.list.get_node_size();
     
     return size;
 };
 
-void run_push_front_benchmark(double* deque_times, double* array_times, double* list_times) {
-    int sizes[] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
-    int n_sizes = 7;
-
-    for (int size = 0; size < n_sizes; size++) {
-        int n = sizes[size];
+void run_push_front_benchmark(double* deque_times, double* array_times, double* list_times, const BenchmarkParams& params) {
+    for (int number = 0; number < params.sizes_count; number++) {
+        int size = params.sizes[number];
 
         MutableSegmentedDeque<int> deque;
         auto start_deque = std::chrono::high_resolution_clock::now();
 
-        for (int i = 0; i < n; i++) {
-            deque.push_front(i);
+        for (int idx = 0; idx < size; idx++) {
+            deque.push_front(idx);
         }
 
         auto finish_deque = std::chrono::high_resolution_clock::now();
-        deque_times[size] = std::chrono::duration<double, std::milli>(finish_deque - start_deque).count();
+        deque_times[number] = std::chrono::duration<double, std::milli>(finish_deque - start_deque).count();
         
         MutableArraySequence<int> array;
         auto start_array = std::chrono::high_resolution_clock::now();
 
-        for (int i = 0; i < n; i++) {
-            array.prepend(i);
+        for (int idx = 0; idx < size; idx++) {
+            array.prepend(idx);
         }
 
         auto finish_array = std::chrono::high_resolution_clock::now();
-        array_times[size] = std::chrono::duration<double, std::milli>(finish_array - start_array).count();
+        array_times[number] = std::chrono::duration<double, std::milli>(finish_array - start_array).count();
 
         MutableListSequence<int> list;
         auto start_list = std::chrono::high_resolution_clock::now();
 
-        for (int i = 0; i < n; i++) {
-            list.prepend(i);
+        for (int idx = 0; idx < size; idx++) {
+            list.prepend(idx);
         }
 
         auto finish_list = std::chrono::high_resolution_clock::now();
-        list_times[size] = std::chrono::duration<double, std::milli>(finish_list - start_list).count();
+        list_times[number] = std::chrono::duration<double, std::milli>(finish_list - start_list).count();
     }
 };
 
-void run_get_benchmark(double* deque_times, double* array_times, double* list_times) {
-    int sizes[] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
-    const int ACCESSES = 10000; // сколько случайных get'ов делать на каждом размере
-    
-    std::mt19937 rng(42); // генератор с фиксированным seed для воспроизводимости
+void run_get_benchmark(double* deque_times, double* array_times, double* list_times, const BenchmarkParams& params) {
+    std::mt19937 rng(42); // Генератор с фиксированным seed для воспроизводимости
  
-    for (int s = 0; s < 7; s++) {
-        int n = sizes[s];
-        std::uniform_int_distribution<int> dist(0, n - 1);
+    for (int number = 0; number < params.sizes_count; number++) {
+        int size = params.sizes[number];
+        if (size <= 0 || params.get_accesses <= 0) {
+            deque_times[number] = 0;
+            array_times[number] = 0;
+            list_times[number] = 0;
+            continue;
+        }
+        std::uniform_int_distribution<int> dist(0, size - 1);
  
-        // --- Подготовка: заполняем структуры (это НЕ замеряем) ---
+        // Подготовка: заполняем структуры (это НЕ замеряем)
         MutableSegmentedDeque<int> deque;
         MutableArraySequence<int> array;
         MutableListSequence<int> list;
-        for (int i = 0; i < n; i++) {
-            deque.push_back(i);
-            array.append(i);
-            list.append(i);
+        for (int idx = 0; idx < size; idx++) {
+            deque.push_back(idx);
+            array.append(idx);
+            list.append(idx);
+        }
+
+        // Генерируем случайные индексы заранее, чтобы все структуры обращались к одинаковым
+        int* indices = new int[params.get_accesses];
+        for (int idx = 0; idx < params.get_accesses; idx++) {
+            indices[idx] = dist(rng);
         }
  
-        // --- Генерируем случайные индексы заранее, чтобы все структуры обращались к одинаковым ---
-        int* indices = new int[ACCESSES];
-        for (int i = 0; i < ACCESSES; i++) {
-            indices[i] = dist(rng);
-        }
- 
-        // --- Замер SegmentedDeque ---
+        // Замер SegmentedDeque
         auto t1 = std::chrono::high_resolution_clock::now();
-        volatile int sum1 = 0; // volatile чтобы компилятор не выкинул цикл как "бесполезный"
-        for (int i = 0; i < ACCESSES; i++) {
-            sum1 += deque.get(indices[i]);
+        volatile int sum1 = 0;
+        for (int idx = 0; idx < params.get_accesses; idx++) {
+            sum1 += deque.get(indices[idx]);
         }
         auto t2 = std::chrono::high_resolution_clock::now();
-        deque_times[s] = std::chrono::duration<double, std::milli>(t2 - t1).count();
+        deque_times[number] = std::chrono::duration<double, std::milli>(t2 - t1).count();
  
-        // --- Замер ArraySequence ---
+        // Замер ArraySequence
         t1 = std::chrono::high_resolution_clock::now();
         volatile int sum2 = 0;
-        for (int i = 0; i < ACCESSES; i++) {
-            sum2 += array.get(indices[i]);
+        for (int idx = 0; idx < params.get_accesses; idx++) {
+            sum2 += array.get(indices[idx]);
         }
         t2 = std::chrono::high_resolution_clock::now();
-        array_times[s] = std::chrono::duration<double, std::milli>(t2 - t1).count();
+        array_times[number] = std::chrono::duration<double, std::milli>(t2 - t1).count();
  
-        // --- Замер ListSequence ---
+        // Замер ListSequence
         t1 = std::chrono::high_resolution_clock::now();
         volatile int sum3 = 0;
 
         EnumeratorWrapper<int> iter(list.get_enumerator());
 
-        for (int i = 0; i < ACCESSES; i++) {
-            int target_index = indices[i];
+        for (int idx = 0; idx < params.get_accesses; idx++) {
+            int target_index = indices[idx];
 
             iter.reset();
 
@@ -187,77 +195,82 @@ void run_get_benchmark(double* deque_times, double* array_times, double* list_ti
         }
 
         t2 = std::chrono::high_resolution_clock::now();
-        list_times[s] = std::chrono::duration<double, std::milli>(t2 - t1).count();
+        list_times[number] = std::chrono::duration<double, std::milli>(t2 - t1).count();
  
         delete[] indices;
     }
 }
 
-void run_memory_benchmark(double* deque_mem, double* array_mem, double* list_mem) {
-    int sizes[] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
-    
-    for (int s = 0; s < 7; s++) {
-        int n = sizes[s];
+void run_memory_benchmark(double* deque_mem, double* array_mem, double* list_mem, const BenchmarkParams& params) {
+    for (int number = 0; number < params.sizes_count; number++) {
+        int size = params.sizes[number];
 
         // Создаём дек, заполняем, измеряем
         MutableSegmentedDeque<int> deque;
-        for (int i = 0; i < n; i++) deque.push_back(i);
-        deque_mem[s] = (double)measure_deque_memory(deque) / 1024.0; // в КБ
+        for (int idx = 0; idx < size; idx++) {
+            deque.push_back(idx);
+        }
+        deque_mem[number] = (double)measure_deque_memory(deque) / 1024.0; // в КБ
 
         // ArraySequence
         MutableArraySequence<int> array;
-        for (int i = 0; i < n; i++) array.append(i);
-        array_mem[s] = (double)measure_array_seq_memory(array) / 1024.0;
+        for (int idx = 0; idx < size; idx++) {
+            array.append(idx);
+        }
+        array_mem[number] = (double)measure_array_seq_memory(array) / 1024.0;
 
         // ListSequence
         MutableListSequence<int> list;
-        for (int i = 0; i < n; i++) list.append(i);
-        list_mem[s] = (double)measure_list_seq_memory(list) / 1024.0;
+        for (int idx = 0; idx < size; idx++) {
+            list.append(idx);
+        }
+        list_mem[number] = (double)measure_list_seq_memory(list) / 1024.0;
     }
 }
 
-void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_mem) {
-    // Прогрев аллокатора — выделяем и освобождаем большой буфер
-    void* warmup = malloc(10 * 1024 * 1024);  // 10 МБ
+void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_mem, const BenchmarkParams& params) {
+    // Выделяем и освобождаем большой буфер
+    void* warmup = malloc(params.os_memory_warmup_bytes);
     if (warmup) free(warmup);
-    heap_trim();  // просим аллокатор вернуть свободные страницы ОС
-    
-    int sizes[] = {1000, 2000, 5000, 10000, 20000, 50000, 100000};
-    
-    for (int s = 0; s < 7; s++) {
-        int n = sizes[s];
+    heap_trim();  // Просим аллокатор вернуть свободные страницы ОС
+
+    for (int number = 0; number < params.sizes_count; number++) {
+        int size = params.sizes[number];
         
-        // SegmentedDeque
         heap_trim();
-        sleep_ms(50);  // даём ОС обновить статистику
+        sleep_ms(params.os_memory_pause_ms);  //  ОС обновляет статистику
         size_t before = get_process_memory();
         {
             MutableSegmentedDeque<int> deque;
-            for (int i = 0; i < n; i++) deque.push_back(i);
+            for (int idx = 0; idx < size; idx++) {
+                deque.push_back(idx);
+            }
             size_t after = get_process_memory();
-            deque_mem[s] = (double)(after - before) / 1024.0;
+            deque_mem[number] = (double)(after - before) / 1024.0;
         }
         
-        // ArraySequence
         heap_trim();
-        sleep_ms(50);
+        sleep_ms(params.os_memory_pause_ms);
         before = get_process_memory();
         {
             MutableArraySequence<int> arr;
-            for (int i = 0; i < n; i++) arr.append(i);
+            for (int idx = 0; idx < size; idx++) {
+                arr.append(idx);
+            }
             size_t after = get_process_memory();
-            array_mem[s] = (double)(after - before) / 1024.0;
+            array_mem[number] = (double)(after - before) / 1024.0;
         }
         
-        // ListSequence
         heap_trim();
-        sleep_ms(50);
+        sleep_ms(params.os_memory_pause_ms);
         before = get_process_memory();
         {
             MutableListSequence<int> list;
-            for (int i = 0; i < n; i++) list.append(i);
+            for (int idx = 0; idx < size; idx++) {
+                list.append(idx);
+            }
             size_t after = get_process_memory();
-            list_mem[s] = (double)(after - before) / 1024.0;
+            list_mem[number] = (double)(after - before) / 1024.0;
         }
     }
 }
@@ -265,12 +278,13 @@ void run_os_memory_benchmark(double* deque_mem, double* array_mem, double* list_
 void run_benchmarks(double* deque_push_front_times, double* array_push_front_times, double* list_push_front_times,
                     double* deque_get_times, double* array_get_times, double* list_get_times,
                     double* deque_mem, double* array_mem, double* list_mem,
-                    double* deque_os_mem, double* array_os_mem, double* list_os_mem) {
+                    double* deque_os_mem, double* array_os_mem, double* list_os_mem,
+                    const BenchmarkParams& params) {
 
-    run_push_front_benchmark(deque_push_front_times, array_push_front_times, list_push_front_times);
-    run_get_benchmark(deque_get_times, array_get_times, list_get_times);
-    run_memory_benchmark(deque_mem, array_mem, list_mem);
-    run_os_memory_benchmark(deque_os_mem, array_os_mem, list_os_mem);
+    run_push_front_benchmark(deque_push_front_times, array_push_front_times, list_push_front_times, params);
+    run_get_benchmark(deque_get_times, array_get_times, list_get_times, params);
+    run_memory_benchmark(deque_mem, array_mem, list_mem, params);
+    run_os_memory_benchmark(deque_os_mem, array_os_mem, list_os_mem, params);
 };
 
 #endif

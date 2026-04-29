@@ -13,7 +13,7 @@ struct HanoiMove {
 
 #include "hanoi_vis.h"
 
-static void hanoi_recursive(int n, // Количество колец
+static void hanoi_recursive(int count, // Количество колец
                             MutableSegmentedDeque<Ring>& from, int from_id, // Откуда перемещаем
                             MutableSegmentedDeque<Ring>& to, int to_id, // Куда перемещаем
                             MutableSegmentedDeque<Ring>& aux, int aux_id,
@@ -21,7 +21,7 @@ static void hanoi_recursive(int n, // Количество колец
     
     Ring elem;
 
-    if (n == 1) {
+    if (count == 1) {
         from.pop_back(&elem);
         to.push_back(elem);
 
@@ -35,7 +35,7 @@ static void hanoi_recursive(int n, // Количество колец
         return;
     }
 
-    hanoi_recursive(n - 1, from, from_id, aux, aux_id, to, to_id, moves); // Перемещаем n - 1 колец на вспомогательный стержень
+    hanoi_recursive(count - 1, from, from_id, aux, aux_id, to, to_id, moves); // Перемещаем n - 1 колец на вспомогательный стержень
 
     from.pop_back(&elem); // Самое большое перемещаем
     to.push_back(elem);
@@ -47,21 +47,15 @@ static void hanoi_recursive(int n, // Количество колец
     strcpy(move.ring_color, elem.get_color());
     moves.push_back(move);
         
-    hanoi_recursive(n - 1, aux, aux_id, to, to_id, from, from_id, moves); // Перемещаем n - 1 колец на целевой стержень
+    hanoi_recursive(count - 1, aux, aux_id, to, to_id, from, from_id, moves); // Перемещаем n - 1 колец на целевой стержень
 };
 
 static bool ring_compare(const Ring& a, const Ring& b) {
     return a < b;  // Большие кольца первыми
 }
 
-static MutableSegmentedDeque<HanoiMove> hanoi_collect_moves(
-    const MutableSegmentedDeque<Ring>& rings, 
-    int start_stick, 
-    int target_stick) 
-{
-    if (start_stick < 0 || start_stick > 2 || 
-        target_stick < 0 || target_stick > 2 || 
-        target_stick == start_stick) {
+static MutableSegmentedDeque<HanoiMove> hanoi_collect_moves(const MutableSegmentedDeque<Ring>& rings, int start_stick, int target_stick) {
+    if (start_stick < 0 || start_stick > 2 || target_stick < 0 || target_stick > 2 || target_stick == start_stick) {
         throw std::out_of_range("Invalid sticks");
     }
     

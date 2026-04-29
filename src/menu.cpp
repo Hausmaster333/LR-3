@@ -10,7 +10,7 @@
 
 const int MAX_DEQUES = 10;
 
-// --- Ввод ---
+// ====== Ввод
 
 void read_int(int& value) {
     std::string line;
@@ -45,7 +45,7 @@ void read_string(char* buf, int max_len) {
     buf[max_len - 1] = '\0';
 }
 
-// --- Тип элементов ---
+// ====== Тип элементов
 
 enum ElementType { 
     TYPE_INT = 1, 
@@ -56,7 +56,7 @@ enum ElementType {
 
 ElementType current_type = TYPE_INT;
 
-// --- Хранение деков для каждого типа ---
+// ====== Хранение деков для каждого типа
 
 MutableSegmentedDeque<int>* int_deques[MAX_DEQUES];
 int int_deque_count = 0;
@@ -70,7 +70,7 @@ int string_deque_count = 0;
 MutableSegmentedDeque<Complex>* complex_deques[MAX_DEQUES];
 int complex_deque_count = 0;
 
-// --- Вспомогательные функции ---
+// ====== Вспомогательные функции
 
 int int_square(const int& x) { return x * x; }
 int int_double_val(const int& x) { return x * 2; }
@@ -86,7 +86,7 @@ Complex cmplx_square(const Complex& c) { return Complex(c.get_real() * c.get_rea
 Complex cmplx_sum(const Complex& a, const Complex& b) { return Complex(a.get_real() + b.get_real(), a.get_imag() + b.get_imag()); }
 bool cmplx_modulus_gt1(const Complex& c) { return c.modulus() > 1.0; }
 
-// --- Печать деков ---
+// ====== Печать деков
 
 void print_int_deque(MutableSegmentedDeque<int>* d) {
     std::cout << "[";
@@ -457,7 +457,7 @@ void menu_pop() {
     }
 }
 
-// ====== Print all deques
+// ====== Вывести все последовательности
 
 void menu_print_deques() {
     std::cout << "\n=== All Deques ===" << std::endl;
@@ -495,7 +495,7 @@ void menu_print_deques() {
     }
 }
 
-// ====== Get element
+// ====== Получить элемент
 
 void menu_get_element() {
     std::cout << "Index: ";
@@ -528,9 +528,9 @@ void menu_get_element() {
     }
 }
 
-// ====== Subsequence
+// ====== get_sub_sequence
 
-void menu_subsequence() {
+void menu_sub_sequence() {
     std::cout << "Start index: "; int start; read_int(start);
     std::cout << "End index: "; int end; read_int(end);
 
@@ -1114,7 +1114,7 @@ void run_menu() {
                 menu_get_element(); 
                 break;
             case 7: 
-                menu_subsequence(); 
+                menu_sub_sequence(); 
                 break;
             case 8: 
                 menu_concat(); 
@@ -1155,19 +1155,19 @@ void run_menu() {
         }
     }
 
-    for (int i = 0; i < int_deque_count; i++) {
-        delete int_deques[i];
+    for (int idx = 0; idx < int_deque_count; idx++) {
+        delete int_deques[idx];
     }
 
-    for (int i = 0; i < double_deque_count; i++) {
-        delete double_deques[i];
+    for (int idx = 0; idx < double_deque_count; idx++) {
+        delete double_deques[idx];
     }
     
-    for (int i = 0; i < string_deque_count; i++) {
-        delete string_deques[i];
+    for (int idx = 0; idx < string_deque_count; idx++) {
+        delete string_deques[idx];
     }
 
-    for (int i = 0; i < complex_deque_count; i++) {
-        delete complex_deques[i];
+    for (int idx = 0; idx < complex_deque_count; idx++) {
+        delete complex_deques[idx];
     }
 }
