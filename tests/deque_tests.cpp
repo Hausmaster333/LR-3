@@ -98,25 +98,25 @@ TEST(SegmentedDequeTest, PushFrontSingle) {
 
 TEST(SegmentedDequeTest, PushBackMultiple) {
     MutableSegmentedDeque<int> deque;
-    for (int i = 0; i < 20; i++) {
-        deque.push_back(i);
+    for (int idx = 0; idx < 20; idx++) {
+        deque.push_back(idx);
     }
 
     EXPECT_EQ(deque.get_count(), 20);
-    for (int i = 0; i < 20; i++) {
-        EXPECT_EQ(deque.get(i), i);
+    for (int idx = 0; idx < 20; idx++) {
+        EXPECT_EQ(deque.get(idx), idx);
     }
 }
 
 TEST(SegmentedDequeTest, PushFrontMultiple) {
     MutableSegmentedDeque<int> deque;
-    for (int i = 0; i < 20; i++) {
-        deque.push_front(i);
+    for (int idx = 0; idx < 20; idx++) {
+        deque.push_front(idx);
     }
 
     EXPECT_EQ(deque.get_count(), 20);
-    for (int i = 0; i < 20; i++) {
-        EXPECT_EQ(deque.get(i), 19 - i);
+    for (int idx = 0; idx < 20; idx++) {
+        EXPECT_EQ(deque.get(idx), 19 - idx);
     }
 }
 
@@ -201,26 +201,25 @@ TEST(SegmentedDequeTest, PushPopInterleaved) {
 // Тест на переход через границу сегмента (segment_size = 8)
 TEST(SegmentedDequeTest, PushAcrossSegmentBoundary) {
     MutableSegmentedDeque<int> deque;
-    // Добавляем больше элементов, чем помещается в один сегмент
-    for (int i = 0; i < 25; i++) {
-        deque.push_back(i * 10);
+    for (int idx = 0; idx < 25; idx++) {
+        deque.push_back(idx * 10);
     }
 
     EXPECT_EQ(deque.get_count(), 25);
-    for (int i = 0; i < 25; i++) {
-        EXPECT_EQ(deque.get(i), i * 10);
+    for (int idx = 0; idx < 25; idx++) {
+        EXPECT_EQ(deque.get(idx), idx * 10);
     }
 }
 
 TEST(SegmentedDequeTest, PushFrontAcrossSegmentBoundary) {
     MutableSegmentedDeque<int> deque;
-    for (int i = 0; i < 25; i++) {
-        deque.push_front(i);
+    for (int idx = 0; idx < 25; idx++) {
+        deque.push_front(idx);
     }
 
     EXPECT_EQ(deque.get_count(), 25);
-    for (int i = 0; i < 25; i++) {
-        EXPECT_EQ(deque.get(i), 24 - i);
+    for (int idx = 0; idx < 25; idx++) {
+        EXPECT_EQ(deque.get(idx), 24 - idx);
     }
 }
 
@@ -238,8 +237,8 @@ TEST(SegmentedDequeTest, GetByIndex) {
     int items[] = {5, 10, 15, 20, 25};
     MutableSegmentedDeque<int> deque(items, 5);
 
-    for (int i = 0; i < 5; i++) {
-        EXPECT_EQ(deque.get(i), (i + 1) * 5);
+    for (int idx = 0; idx < 5; idx++) {
+        EXPECT_EQ(deque.get(idx), (idx + 1) * 5);
     }
 }
 
@@ -369,8 +368,8 @@ TEST(SegmentedDequeTest, Concat) {
 
     MutableSegmentedDeque<int>* result = deque1.concat_defined(&deque2);
     EXPECT_EQ(result->get_count(), 6);
-    for (int i = 0; i < 6; i++) {
-        EXPECT_EQ(result->get(i), i + 1);
+    for (int idx = 0; idx < 6; idx++) {
+        EXPECT_EQ(result->get(idx), idx + 1);
     }
     delete result;
 }
@@ -488,8 +487,8 @@ TEST(SegmentedDequeTest, SortAlreadySorted) {
     MutableSegmentedDeque<int> deque(items, 5);
 
     deque.sort();
-    for (int i = 0; i < 5; i++) {
-        EXPECT_EQ(deque.get(i), i + 1);
+    for (int idx = 0; idx < 5; idx++) {
+        EXPECT_EQ(deque.get(idx), idx + 1);
     }
 }
 
@@ -528,8 +527,8 @@ TEST(SegmentedDequeTest, MergeSorted) {
 
     SegmentedDeque<int>* merged = deque1.merge(&deque2);
     EXPECT_EQ(merged->get_count(), 8);
-    for (int i = 0; i < 8; i++) {
-        EXPECT_EQ(merged->get(i), i + 1);
+    for (int idx = 0; idx < 8; idx++) {
+        EXPECT_EQ(merged->get(idx), idx + 1);
     }
     delete merged;
 }
@@ -542,8 +541,8 @@ TEST(SegmentedDequeTest, MergeDifferentSizes) {
 
     SegmentedDeque<int>* merged = deque1.merge(&deque2);
     EXPECT_EQ(merged->get_count(), 7);
-    for (int i = 0; i < 7; i++) {
-        EXPECT_EQ(merged->get(i), i + 1);
+    for (int idx = 0; idx < 7; idx++) {
+        EXPECT_EQ(merged->get(idx), idx + 1);
     }
     delete merged;
 }
@@ -649,14 +648,14 @@ TEST(SegmentedDequeTest, InsertAtInvalidIndexThrows) {
 
 TEST(SegmentedDequeTest, PushPopUntilEmpty) {
     MutableSegmentedDeque<int> deque;
-    for (int i = 0; i < 10; i++) {
-        deque.push_back(i);
+    for (int idx = 0; idx < 10; idx++) {
+        deque.push_back(idx);
     }
 
     int result;
-    for (int i = 0; i < 10; i++) {
+    for (int idx = 0; idx < 10; idx++) {
         deque.pop_front(&result);
-        EXPECT_EQ(result, i);
+        EXPECT_EQ(result, idx);
     }
     EXPECT_EQ(deque.get_count(), 0);
 }
@@ -665,9 +664,9 @@ TEST(SegmentedDequeTest, PushPopAlternating) {
     MutableSegmentedDeque<int> deque;
     int result;
 
-    for (int i = 0; i < 50; i++) {
-        deque.push_back(i);
-        deque.push_front(-i);
+    for (int idx = 0; idx < 50; idx++) {
+        deque.push_back(idx);
+        deque.push_front(-idx);
     }
     // Дек: [-49, -48, ..., -1, 0, 0, 1, 2, ..., 49]
     EXPECT_EQ(deque.get_count(), 100);
@@ -682,16 +681,16 @@ TEST(SegmentedDequeTest, LargeDeque) {
     MutableSegmentedDeque<int> deque;
     int n = 1000;
 
-    for (int i = 0; i < n; i++) {
-        deque.push_back(i);
+    for (int idx = 0; idx < n; idx++) {
+        deque.push_back(idx);
     }
 
     EXPECT_EQ(deque.get_count(), n);
     EXPECT_EQ(deque.get_first(), 0);
     EXPECT_EQ(deque.get_last(), n - 1);
 
-    for (int i = 0; i < n; i++) {
-        EXPECT_EQ(deque.get(i), i);
+    for (int idx = 0; idx < n; idx++) {
+        EXPECT_EQ(deque.get(idx), idx);
     }
 }
 
@@ -836,7 +835,7 @@ TEST(SegmentedDequeTest, PersonCopyIndependence) {
     Person p2(Person_ID{2, 200}, (char*)"Petr", (char*)"Petrovich", (char*)"Petrov");
     deque.push_back(p2);
     EXPECT_EQ(deque.get_count(), 2);
-    EXPECT_EQ(copy.get_count(), 1); // копия не изменилась
+    EXPECT_EQ(copy.get_count(), 1); // Копия не изменилась
 }
  
 TEST(SegmentedDequeTest, StudentDeque) {
@@ -932,9 +931,9 @@ TEST(SegmentedDequeTest, FunctionPointerApplyAll) {
     int value = 10;
     int results[] = {11, 20, 13}; // inc1(10)=11, mul2(10)=20, inc3(10)=13
  
-    for (int i = 0; i < deque.get_count(); i++) {
-        int (*f)(int) = deque.get(i);
-        EXPECT_EQ(f(value), results[i]);
+    for (int idx = 0; idx < deque.get_count(); idx++) {
+        int (*f)(int) = deque.get(idx);
+        EXPECT_EQ(f(value), results[idx]);
     }
 }
  

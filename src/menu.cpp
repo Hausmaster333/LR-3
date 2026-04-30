@@ -88,47 +88,47 @@ bool cmplx_modulus_gt1(const Complex& c) { return c.modulus() > 1.0; }
 
 // ====== Печать деков
 
-void print_int_deque(MutableSegmentedDeque<int>* d) {
+void print_int_deque(MutableSegmentedDeque<int>* deq) {
     std::cout << "[";
-    for (int i = 0; i < d->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << d->get(i);
+    for (int idx = 0; idx < deq->get_count(); idx++) {
+        if (idx > 0) std::cout << ", ";
+        std::cout << deq->get(idx);
     }
     std::cout << "]" << std::endl;
 }
 
-void print_double_deque(MutableSegmentedDeque<double>* d) {
+void print_double_deque(MutableSegmentedDeque<double>* deq) {
     std::cout << "[";
-    for (int i = 0; i < d->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << d->get(i);
+    for (int idx = 0; idx < deq->get_count(); idx++) {
+        if (idx > 0) std::cout << ", ";
+        std::cout << deq->get(idx);
     }
     std::cout << "]" << std::endl;
 }
 
-void print_string_deque(MutableSegmentedDeque<std::string>* d) {
+void print_string_deque(MutableSegmentedDeque<std::string>* deq) {
     std::cout << "[";
-    for (int i = 0; i < d->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << "\"" << d->get(i) << "\"";
+    for (int idx = 0; idx < deq->get_count(); idx++) {
+        if (idx > 0) std::cout << ", ";
+        std::cout << "\"" << deq->get(idx) << "\"";
     }
     std::cout << "]" << std::endl;
 }
 
-void print_complex_deque(MutableSegmentedDeque<Complex>* d) {
+void print_complex_deque(MutableSegmentedDeque<Complex>* deq) {
     std::cout << "[";
-    for (int i = 0; i < d->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << "(" << d->get(i).get_real() << " + " << d->get(i).get_imag() << "i)";
+    for (int idx = 0; idx < deq->get_count(); idx++) {
+        if (idx > 0) std::cout << ", ";
+        std::cout << "(" << deq->get(idx).get_real() << " + " << deq->get(idx).get_imag() << "i)";
     }
     std::cout << "]" << std::endl;
 }
 
-void print_ring_deque(MutableSegmentedDeque<Ring>* d) {
+void print_ring_deque(MutableSegmentedDeque<Ring>* deq) {
     std::cout << "[";
-    for (int i = 0; i < d->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << "{size=" << d->get(i).get_size() << ", shape=" << d->get(i).get_shape() << ", color=" << d->get(i).get_color() << "}";
+    for (int idx = 0; idx < deq->get_count(); idx++) {
+        if (idx > 0) std::cout << ", ";
+        std::cout << "{size=" << deq->get(idx).get_size() << ", shape=" << deq->get(idx).get_shape() << ", color=" << deq->get(idx).get_color() << "}";
     }
     std::cout << "]" << std::endl;
 }
@@ -172,81 +172,94 @@ void menu_create_deque() {
             return; 
         }
 
-        MutableSegmentedDeque<int>* d = new MutableSegmentedDeque<int>();
+        MutableSegmentedDeque<int>* deq = new MutableSegmentedDeque<int>();
 
         if (choice == 2) {
             std::cout << "Number of elements: ";
-            int n; read_int(n);
-            for (int i = 0; i < n; i++) {
-                std::cout << "Element " << i << ": ";
-                int val; read_int(val);
-                d->push_back(val);
+            int n;
+            read_int(n);
+            for (int idx = 0; idx < n; idx++) {
+                std::cout << "Element " << idx << ": ";
+                int val;
+                read_int(val);
+
+                deq->push_back(val);
             }
         }
-        int_deques[int_deque_count++] = d;
+        int_deques[int_deque_count++] = deq;
         std::cout << "Deque<int> created (index: " << int_deque_count - 1 << ")" << std::endl;
-    }
-    else if (current_type == TYPE_DOUBLE) {
+
+    } else if (current_type == TYPE_DOUBLE) {
         if (double_deque_count >= MAX_DEQUES) { 
             std::cout << "Max deques reached" << std::endl; 
             return; 
         }
 
-        MutableSegmentedDeque<double>* d = new MutableSegmentedDeque<double>();
+        MutableSegmentedDeque<double>* deq = new MutableSegmentedDeque<double>();
 
         if (choice == 2) {
             std::cout << "Number of elements: ";
-            int n; read_int(n);
-            for (int i = 0; i < n; i++) {
-                std::cout << "Element " << i << ": ";
-                double val; read_double(val);
-                d->push_back(val);
+            int n;
+            read_int(n);
+            for (int idx = 0; idx < n; idx++) {
+                std::cout << "Element " << idx << ": ";
+                double val;
+                read_double(val);
+
+                deq->push_back(val);
             }
         }
-        double_deques[double_deque_count++] = d;
+        double_deques[double_deque_count++] = deq;
         std::cout << "Deque<double> created (index: " << double_deque_count - 1 << ")" << std::endl;
-    }
-    else if (current_type == TYPE_STRING) {
+
+    } else if (current_type == TYPE_STRING) {
         if (string_deque_count >= MAX_DEQUES) { 
             std::cout << "Max deques reached" << std::endl; 
             return; 
         }
 
-        MutableSegmentedDeque<std::string>* d = new MutableSegmentedDeque<std::string>();
+        MutableSegmentedDeque<std::string>* deq = new MutableSegmentedDeque<std::string>();
 
         if (choice == 2) {
             std::cout << "Number of elements: ";
-            int n; read_int(n);
-            for (int i = 0; i < n; i++) {
-                std::cout << "Element " << i << ": ";
+            int n;
+            read_int(n);
+            for (int idx = 0; idx < n; idx++) {
+                std::cout << "Element " << idx << ": ";
                 std::string val;
                 std::getline(std::cin, val);
-                d->push_back(val);
+
+                deq->push_back(val);
             }
         }
-        string_deques[string_deque_count++] = d;
+        string_deques[string_deque_count++] = deq;
         std::cout << "Deque<string> created (index: " << string_deque_count - 1 << ")" << std::endl;
-    }
-    else if (current_type == TYPE_COMPLEX) {
+
+    } else if (current_type == TYPE_COMPLEX) {
         if (complex_deque_count >= MAX_DEQUES) { 
             std::cout << "Max deques reached" << std::endl; 
             return; 
         }
 
-        MutableSegmentedDeque<Complex>* d = new MutableSegmentedDeque<Complex>();
+        MutableSegmentedDeque<Complex>* deq = new MutableSegmentedDeque<Complex>();
 
         if (choice == 2) {
             std::cout << "Number of elements: ";
-            int n; read_int(n);
-            for (int i = 0; i < n; i++) {
-                std::cout << "Element " << i << " (real): ";
-                double re; read_double(re);
-                std::cout << "Element " << i << " (imag): ";
-                double im; read_double(im);
-                d->push_back(Complex(re, im));
+            int n;
+            read_int(n);
+            for (int idx = 0; idx < n; idx++) {
+                std::cout << "Element " << idx << " (real): ";
+                double re;
+                read_double(re);
+
+                std::cout << "Element " << idx << " (imag): ";
+                double im;
+                read_double(im);
+
+                deq->push_back(Complex(re, im));
             }
         }
-        complex_deques[complex_deque_count++] = d;
+        complex_deques[complex_deque_count++] = deq;
         std::cout << "Deque<Complex> created (index: " << complex_deque_count - 1 << ")" << std::endl;
     }
 }
@@ -261,12 +274,14 @@ int select_int_deque(const char* msg) {
 
     std::cout << msg << std::endl;
 
-    for (int i = 0; i < int_deque_count; i++) { 
-        std::cout << i << ": "; 
-        print_int_deque(int_deques[i]); 
+    for (int idx = 0; idx < int_deque_count; idx++) { 
+        std::cout << idx << ": "; 
+        print_int_deque(int_deques[idx]); 
     }
 
-    std::cout << "Index: "; int idx; read_int(idx);
+    std::cout << "Index: ";
+    int idx;
+    read_int(idx);
 
     if (idx < 0 || idx >= int_deque_count) { 
         std::cout << "Invalid index" << std::endl; 
@@ -283,12 +298,14 @@ int select_double_deque(const char* msg) {
 
     std::cout << msg << std::endl;
 
-    for (int i = 0; i < double_deque_count; i++) { 
-        std::cout << i << ": "; 
-        print_double_deque(double_deques[i]); 
+    for (int idx = 0; idx < double_deque_count; idx++) { 
+        std::cout << idx << ": "; 
+        print_double_deque(double_deques[idx]); 
     }
 
-    std::cout << "Index: "; int idx; read_int(idx);
+    std::cout << "Index: ";
+    int idx;
+    read_int(idx);
 
     if (idx < 0 || idx >= double_deque_count) { 
         std::cout << "Invalid index" << std::endl; 
@@ -305,12 +322,14 @@ int select_string_deque(const char* msg) {
 
     std::cout << msg << std::endl;
 
-    for (int i = 0; i < string_deque_count; i++) { 
-        std::cout << i << ": "; 
-        print_string_deque(string_deques[i]); 
+    for (int idx = 0; idx < string_deque_count; idx++) { 
+        std::cout << idx << ": "; 
+        print_string_deque(string_deques[idx]); 
     }
 
-    std::cout << "Index: "; int idx; read_int(idx);
+    std::cout << "Index: ";
+    int idx;
+    read_int(idx);
 
     if (idx < 0 || idx >= string_deque_count) { 
         std::cout << "Invalid index" << std::endl; 
@@ -327,12 +346,14 @@ int select_complex_deque(const char* msg) {
 
     std::cout << msg << std::endl;
 
-    for (int i = 0; i < complex_deque_count; i++) { 
-        std::cout << i << ": "; 
-        print_complex_deque(complex_deques[i]); 
+    for (int idx = 0; idx < complex_deque_count; idx++) { 
+        std::cout << idx << ": "; 
+        print_complex_deque(complex_deques[idx]); 
     }
 
-    std::cout << "Index: "; int idx; read_int(idx);
+    std::cout << "Index: ";
+    int idx;
+    read_int(idx);
 
     if (idx < 0 || idx >= complex_deque_count) { 
         std::cout << "Invalid index" << std::endl; 
@@ -348,7 +369,8 @@ void menu_push() {
     std::cout << "1. Push back" << std::endl;
     std::cout << "2. Push front" << std::endl;
     std::cout << "Choice: ";
-    int side; read_int(side);
+    int side;
+    read_int(side);
 
     if (side != 1 && side != 2) { 
         std::cout << "Invalid choice" << std::endl; 
@@ -358,11 +380,18 @@ void menu_push() {
     if (current_type == TYPE_INT) {
         int idx = select_int_deque("Select deque:");
         if (idx == -1) return;
-        std::cout << "Value: "; int val; read_int(val);
-        if (side == 1) int_deques[idx]->push_back(val);
-        else int_deques[idx]->push_front(val);
-    }
-    else if (current_type == TYPE_DOUBLE) {
+
+        std::cout << "Value: ";
+        int val;
+        read_int(val);
+
+        if (side == 1) {
+            int_deques[idx]->push_back(val);
+        } else {
+            int_deques[idx]->push_front(val);
+        }
+
+    } else if (current_type == TYPE_DOUBLE) {
         int idx = select_double_deque("Select deque:");
         if (idx == -1) return;
 
@@ -370,10 +399,13 @@ void menu_push() {
         double val; 
         read_double(val);
 
-        if (side == 1) double_deques[idx]->push_back(val);
-        else double_deques[idx]->push_front(val);
-    }
-    else if (current_type == TYPE_STRING) {
+        if (side == 1) {
+            double_deques[idx]->push_back(val);
+        } else {
+            double_deques[idx]->push_front(val);
+        }
+
+    } else if (current_type == TYPE_STRING) {
         int idx = select_string_deque("Select deque:");
         if (idx == -1) return;
 
@@ -381,12 +413,16 @@ void menu_push() {
         std::string val; 
         std::getline(std::cin, val);
 
-        if (side == 1) string_deques[idx]->push_back(val);
-        else string_deques[idx]->push_front(val);
-    }
-    else if (current_type == TYPE_COMPLEX) {
+        if (side == 1) {
+            string_deques[idx]->push_back(val);
+        } else {
+            string_deques[idx]->push_front(val);
+        }
+
+    } else if (current_type == TYPE_COMPLEX) {
         int idx = select_complex_deque("Select deque:");
         if (idx == -1) return;
+
         std::cout << "Real: "; 
         double re; 
         read_double(re);
@@ -395,8 +431,11 @@ void menu_push() {
         double im; 
         read_double(im);
 
-        if (side == 1) complex_deques[idx]->push_back(Complex(re, im));
-        else complex_deques[idx]->push_front(Complex(re, im));
+        if (side == 1) {
+            complex_deques[idx]->push_back(Complex(re, im));
+        } else {
+            complex_deques[idx]->push_front(Complex(re, im));
+        }
     }
     std::cout << "Done" << std::endl;
 }
@@ -408,8 +447,13 @@ void menu_pop() {
     std::cout << "1. Pop back" << std::endl;
     std::cout << "2. Pop front" << std::endl;
     std::cout << "Choice: ";
-    int side; read_int(side);
-    if (side != 1 && side != 2) { std::cout << "Invalid choice" << std::endl; return; }
+    int side;
+    read_int(side);
+
+    if (side != 1 && side != 2) {
+        std::cout << "Invalid choice" << std::endl;
+        return;
+    }
 
     try {
         if (current_type == TYPE_INT) {
@@ -417,38 +461,54 @@ void menu_pop() {
             if (idx == -1) return;
 
             int val;
-            if (side == 1) int_deques[idx]->pop_back(&val);
-            else int_deques[idx]->pop_front(&val);
+            if (side == 1) {
+                int_deques[idx]->pop_back(&val);
+            }
+            else {
+                int_deques[idx]->pop_front(&val);
+            }
 
             std::cout << "Popped: " << val << std::endl;
-        }
-        else if (current_type == TYPE_DOUBLE) {
+
+        } else if (current_type == TYPE_DOUBLE) {
             int idx = select_double_deque("Select deque:");
             if (idx == -1) return;
 
             double val;
-            if (side == 1) double_deques[idx]->pop_back(&val);
-            else double_deques[idx]->pop_front(&val);
+            if (side == 1) {
+                double_deques[idx]->pop_back(&val);
+            }
+            else {
+                double_deques[idx]->pop_front(&val);
+            }
 
             std::cout << "Popped: " << val << std::endl;
-        }
-        else if (current_type == TYPE_STRING) {
+
+        } else if (current_type == TYPE_STRING) {
             int idx = select_string_deque("Select deque:");
             if (idx == -1) return;
 
             std::string val;
-            if (side == 1) string_deques[idx]->pop_back(&val);
-            else string_deques[idx]->pop_front(&val);
+            if (side == 1) {
+                string_deques[idx]->pop_back(&val);
+            }
+            else {
+                string_deques[idx]->pop_front(&val);
+            }
 
             std::cout << "Popped: \"" << val << "\"" << std::endl;
-        }
-        else if (current_type == TYPE_COMPLEX) {
+
+        } else if (current_type == TYPE_COMPLEX) {
             int idx = select_complex_deque("Select deque:");
             if (idx == -1) return;
 
             Complex val;
-            if (side == 1) complex_deques[idx]->pop_back(&val);
-            else complex_deques[idx]->pop_front(&val);
+            if (side == 1) {
+                complex_deques[idx]->pop_back(&val);
+            }
+            else {
+                complex_deques[idx]->pop_front(&val);
+            }
 
             std::cout << "Popped: (" << val.get_real() << " + " << val.get_imag() << "i)" << std::endl;
         }
@@ -464,30 +524,30 @@ void menu_print_deques() {
 
     if (int_deque_count > 0) {
         std::cout << "--- int ---" << std::endl;
-        for (int i = 0; i < int_deque_count; i++) { 
-            std::cout << "[" << i << "]: "; 
-            print_int_deque(int_deques[i]); 
+        for (int idx = 0; idx < int_deque_count; idx++) { 
+            std::cout << "[" << idx << "]: "; 
+            print_int_deque(int_deques[idx]); 
         }
     }
     if (double_deque_count > 0) {
         std::cout << "--- double ---" << std::endl;
-        for (int i = 0; i < double_deque_count; i++) { 
-            std::cout << "[" << i << "]: "; 
-            print_double_deque(double_deques[i]); 
+        for (int idx = 0; idx < double_deque_count; idx++) { 
+            std::cout << "[" << idx << "]: "; 
+            print_double_deque(double_deques[idx]); 
         }
     }
     if (string_deque_count > 0) {
         std::cout << "--- string ---" << std::endl;
-        for (int i = 0; i < string_deque_count; i++) { 
-            std::cout << "[" << i << "]: "; 
-            print_string_deque(string_deques[i]); 
+        for (int idx = 0; idx < string_deque_count; idx++) { 
+            std::cout << "[" << idx << "]: "; 
+            print_string_deque(string_deques[idx]); 
         }
     }
     if (complex_deque_count > 0) {
         std::cout << "--- Complex ---" << std::endl;
-        for (int i = 0; i < complex_deque_count; i++) { 
-            std::cout << "[" << i << "]: "; 
-            print_complex_deque(complex_deques[i]); 
+        for (int idx = 0; idx < complex_deque_count; idx++) { 
+            std::cout << "[" << idx << "]: "; 
+            print_complex_deque(complex_deques[idx]); 
         }
     }
     if (int_deque_count == 0 && double_deque_count == 0 && string_deque_count == 0 && complex_deque_count == 0) {
@@ -499,27 +559,29 @@ void menu_print_deques() {
 
 void menu_get_element() {
     std::cout << "Index: ";
-    int pos; read_int(pos);
+    int pos;
+    read_int(pos);
 
     try {
         if (current_type == TYPE_INT) {
             int idx = select_int_deque("Select deque:");
             if (idx == -1) return;
+
             std::cout << "Element: " << int_deques[idx]->get(pos) << std::endl;
-        }
-        else if (current_type == TYPE_DOUBLE) {
+        } else if (current_type == TYPE_DOUBLE) {
             int idx = select_double_deque("Select deque:");
             if (idx == -1) return;
+
             std::cout << "Element: " << double_deques[idx]->get(pos) << std::endl;
-        }
-        else if (current_type == TYPE_STRING) {
+        } else if (current_type == TYPE_STRING) {
             int idx = select_string_deque("Select deque:");
             if (idx == -1) return;
+
             std::cout << "Element: \"" << string_deques[idx]->get(pos) << "\"" << std::endl;
-        }
-        else if (current_type == TYPE_COMPLEX) {
+        } else if (current_type == TYPE_COMPLEX) {
             int idx = select_complex_deque("Select deque:");
             if (idx == -1) return;
+
             Complex c = complex_deques[idx]->get(pos);
             std::cout << "Element: (" << c.get_real() << " + " << c.get_imag() << "i)" << std::endl;
         }
@@ -531,8 +593,13 @@ void menu_get_element() {
 // ====== get_sub_sequence
 
 void menu_sub_sequence() {
-    std::cout << "Start index: "; int start; read_int(start);
-    std::cout << "End index: "; int end; read_int(end);
+    std::cout << "Start index: ";
+    int start;
+    read_int(start);
+
+    std::cout << "End index: ";
+    int end;
+    read_int(end);
 
     try {
         if (current_type == TYPE_INT) {
@@ -548,9 +615,11 @@ void menu_sub_sequence() {
             if (int_deque_count < MAX_DEQUES) {
                 int_deques[int_deque_count++] = sub_deque;
                 std::cout << "Saved as index " << int_deque_count - 1 << std::endl;
-            } else { delete sub; }
-        }
-        else if (current_type == TYPE_DOUBLE) {
+            } else {
+                delete sub;
+            }
+
+        } else if (current_type == TYPE_DOUBLE) {
             int idx = select_double_deque("Select deque:");
             if (idx == -1) return;
 
@@ -563,9 +632,11 @@ void menu_sub_sequence() {
             if (double_deque_count < MAX_DEQUES) {
                 double_deques[double_deque_count++] = sub_deque;
                 std::cout << "Saved as index " << double_deque_count - 1 << std::endl;
-            } else { delete sub; }
-        }
-        else if (current_type == TYPE_STRING) {
+            } else {
+                delete sub;
+            }
+
+        } else if (current_type == TYPE_STRING) {
             int idx = select_string_deque("Select deque:");
             if (idx == -1) return;
 
@@ -578,9 +649,11 @@ void menu_sub_sequence() {
             if (string_deque_count < MAX_DEQUES) {
                 string_deques[string_deque_count++] = sub_deque;
                 std::cout << "Saved as index " << string_deque_count - 1 << std::endl;
-            } else { delete sub; }
-        }
-        else if (current_type == TYPE_COMPLEX) {
+            } else {
+                delete sub;
+            }
+
+        } else if (current_type == TYPE_COMPLEX) {
             int idx = select_complex_deque("Select deque:");
             if (idx == -1) return;
 
@@ -593,7 +666,9 @@ void menu_sub_sequence() {
             if (complex_deque_count < MAX_DEQUES) {
                 complex_deques[complex_deque_count++] = sub_deque;
                 std::cout << "Saved as index " << complex_deque_count - 1 << std::endl;
-            } else { delete sub; }
+            } else {
+                delete sub;
+            }
         }
     } catch (const std::out_of_range& e) {
         std::cout << "Error: " << e.what() << std::endl;
@@ -619,10 +694,11 @@ void menu_concat() {
         if (int_deque_count < MAX_DEQUES) { 
             int_deques[int_deque_count++] = res_d; 
             std::cout << "Saved as index " << int_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else if (current_type == TYPE_DOUBLE) {
+
+    } else if (current_type == TYPE_DOUBLE) {
         int i1 = select_double_deque("Select first deque:");
         if (i1 == -1) return;
 
@@ -638,10 +714,11 @@ void menu_concat() {
         if (double_deque_count < MAX_DEQUES) { 
             double_deques[double_deque_count++] = res_d; 
             std::cout << "Saved as index " << double_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else if (current_type == TYPE_STRING) {
+
+    } else if (current_type == TYPE_STRING) {
         int i1 = select_string_deque("Select first deque:");
         if (i1 == -1) return;
 
@@ -657,10 +734,11 @@ void menu_concat() {
         if (string_deque_count < MAX_DEQUES) { 
             string_deques[string_deque_count++] = res_d; 
             std::cout << "Saved as index " << string_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else if (current_type == TYPE_COMPLEX) {
+
+    } else if (current_type == TYPE_COMPLEX) {
         int i1 = select_complex_deque("Select first deque:");
         if (i1 == -1) return;
 
@@ -676,8 +754,9 @@ void menu_concat() {
         if (complex_deque_count < MAX_DEQUES) { 
             complex_deques[complex_deque_count++] = res_d; 
             std::cout << "Saved as index " << complex_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
     }
 }
 
@@ -691,14 +770,19 @@ void menu_map() {
         std::cout << "1. square (x^2)" << std::endl;
         std::cout << "2. double (x*2)" << std::endl;
         std::cout << "Choice: "; 
-        int c; 
-        read_int(c);
+        int choice; 
+        read_int(choice);
 
         Sequence<int>* res = nullptr;
 
-        if (c == 1) res = int_deques[idx]->map(int_square);
-        else if (c == 2) res = int_deques[idx]->map(int_double_val);
-        else { std::cout << "Invalid" << std::endl; return; }
+        if (choice == 1) {
+            res = int_deques[idx]->map(int_square);
+        } else if (choice == 2) {
+            res = int_deques[idx]->map(int_double_val);
+        } else { 
+            std::cout << "Invalid" << std::endl;
+            return;
+        }
 
         MutableSegmentedDeque<int>* res_d = dynamic_cast<MutableSegmentedDeque<int>*>(res);
 
@@ -707,11 +791,11 @@ void menu_map() {
         if (int_deque_count < MAX_DEQUES) { 
             int_deques[int_deque_count++] = res_d; 
             std::cout << "Saved as index " << int_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
 
-        else { delete res; }
-    }
-    else if (current_type == TYPE_DOUBLE) {
+    } else if (current_type == TYPE_DOUBLE) {
         int idx = select_double_deque("Select deque:");
         if (idx == -1) return;
 
@@ -723,11 +807,11 @@ void menu_map() {
         if (double_deque_count < MAX_DEQUES) { 
             double_deques[double_deque_count++] = res_d; 
             std::cout << "Saved as index " << double_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
 
-        else { delete res; }
-    }
-    else if (current_type == TYPE_COMPLEX) {
+    } else if (current_type == TYPE_COMPLEX) {
         int idx = select_complex_deque("Select deque:");
         if (idx == -1) return;
 
@@ -739,10 +823,11 @@ void menu_map() {
         if (complex_deque_count < MAX_DEQUES) { 
             complex_deques[complex_deque_count++] = res_d; 
             std::cout << "Saved as index " << complex_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else {
+
+    } else {
         std::cout << "Map not available for this type" << std::endl;
     }
 }
@@ -756,13 +841,20 @@ void menu_where() {
 
         std::cout << "1. is_positive (x > 0)" << std::endl;
         std::cout << "2. is_even (x % 2 == 0)" << std::endl;
-        std::cout << "Choice: "; int c; read_int(c);
+        std::cout << "Choice: ";
+        int choice;
+        read_int(choice);
 
         Sequence<int>* res = nullptr;
 
-        if (c == 1) res = int_deques[idx]->where(int_is_positive);
-        else if (c == 2) res = int_deques[idx]->where(int_is_even);
-        else { std::cout << "Invalid" << std::endl; return; }
+        if (choice == 1) {
+            res = int_deques[idx]->where(int_is_positive);
+        } else if (choice == 2) {
+            res = int_deques[idx]->where(int_is_even);
+        } else {
+            std::cout << "Invalid" << std::endl;
+            return;
+        }
 
         MutableSegmentedDeque<int>* res_d = dynamic_cast<MutableSegmentedDeque<int>*>(res);
         std::cout << "Result: "; 
@@ -771,10 +863,11 @@ void menu_where() {
         if (int_deque_count < MAX_DEQUES) { 
             int_deques[int_deque_count++] = res_d; 
             std::cout << "Saved as index " << int_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else if (current_type == TYPE_DOUBLE) {
+
+    } else if (current_type == TYPE_DOUBLE) {
         int idx = select_double_deque("Select deque:");
         if (idx == -1) return;
 
@@ -787,10 +880,11 @@ void menu_where() {
         if (double_deque_count < MAX_DEQUES) { 
             double_deques[double_deque_count++] = res_d; 
             std::cout << "Saved as index " << double_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else if (current_type == TYPE_COMPLEX) {
+
+    } else if (current_type == TYPE_COMPLEX) {
         int idx = select_complex_deque("Select deque:");
         if (idx == -1) return;
 
@@ -803,10 +897,11 @@ void menu_where() {
         if (complex_deque_count < MAX_DEQUES) { 
             complex_deques[complex_deque_count++] = res_d; 
             std::cout << "Saved as index " << complex_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else {
+
+    } else {
         std::cout << "Where not available for this type" << std::endl;
     }
 }
@@ -819,20 +914,22 @@ void menu_reduce() {
         if (idx == -1) return;
         int result = int_deques[idx]->reduce(int_sum, 0);
         std::cout << "Result reduce(sum, 0): " << result << std::endl;
-    }
-    else if (current_type == TYPE_DOUBLE) {
+
+    } else if (current_type == TYPE_DOUBLE) {
         int idx = select_double_deque("Select deque:");
         if (idx == -1) return;
+
         double result = double_deques[idx]->reduce(dbl_sum, 0.0);
         std::cout << "Result reduce(sum, 0): " << result << std::endl;
-    }
-    else if (current_type == TYPE_COMPLEX) {
+
+    } else if (current_type == TYPE_COMPLEX) {
         int idx = select_complex_deque("Select deque:");
         if (idx == -1) return;
+
         Complex result = complex_deques[idx]->reduce(cmplx_sum, Complex(0, 0));
         std::cout << "Result reduce(sum): (" << result.get_real() << " + " << result.get_imag() << "i)" << std::endl;
-    }
-    else {
+
+    } else {
         std::cout << "Reduce not available for this type" << std::endl;
     }
 }
@@ -843,26 +940,34 @@ void menu_sort() {
     if (current_type == TYPE_INT) {
         int idx = select_int_deque("Select deque:");
         if (idx == -1) return;
+
         int_deques[idx]->sort();
-        std::cout << "Sorted: "; print_int_deque(int_deques[idx]);
-    }
-    else if (current_type == TYPE_DOUBLE) {
+        std::cout << "Sorted: ";
+        print_int_deque(int_deques[idx]);
+
+    } else if (current_type == TYPE_DOUBLE) {
         int idx = select_double_deque("Select deque:");
         if (idx == -1) return;
+
         double_deques[idx]->sort();
-        std::cout << "Sorted: "; print_double_deque(double_deques[idx]);
-    }
-    else if (current_type == TYPE_STRING) {
+        std::cout << "Sorted: ";
+        print_double_deque(double_deques[idx]);
+
+    } else if (current_type == TYPE_STRING) {
         int idx = select_string_deque("Select deque:");
         if (idx == -1) return;
+
         string_deques[idx]->sort();
-        std::cout << "Sorted: "; print_string_deque(string_deques[idx]);
-    }
-    else if (current_type == TYPE_COMPLEX) {
+        std::cout << "Sorted: ";
+        print_string_deque(string_deques[idx]);
+
+    } else if (current_type == TYPE_COMPLEX) {
         int idx = select_complex_deque("Select deque:");
         if (idx == -1) return;
+
         complex_deques[idx]->sort();
-        std::cout << "Sorted (by modulus): "; print_complex_deque(complex_deques[idx]);
+        std::cout << "Sorted (by modulus): ";
+        print_complex_deque(complex_deques[idx]);
     }
 }
 
@@ -885,10 +990,11 @@ void menu_merge() {
         if (int_deque_count < MAX_DEQUES) { 
             int_deques[int_deque_count++] = res_d; 
             std::cout << "Saved as index " << int_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else if (current_type == TYPE_DOUBLE) {
+
+    } else if (current_type == TYPE_DOUBLE) {
         int i1 = select_double_deque("Select first sorted deque:");
         if (i1 == -1) return;
 
@@ -904,10 +1010,11 @@ void menu_merge() {
         if (double_deque_count < MAX_DEQUES) { 
             double_deques[double_deque_count++] = res_d; 
             std::cout << "Saved as index " << double_deque_count - 1 << std::endl; 
+        } else {
+            delete res;
         }
-        else { delete res; }
-    }
-    else {
+
+    } else {
         std::cout << "Merge available for int and double" << std::endl;
     }
 }
@@ -924,9 +1031,11 @@ void menu_find_sub() {
 
         int pos = int_deques[i1]->find_sub_sequence(int_deques[i2]);
         if (pos >= 0) std::cout << "Found at index: " << pos << std::endl;
-        else std::cout << "Not found" << std::endl;
-    }
-    else if (current_type == TYPE_DOUBLE) {
+        else {
+            std::cout << "Not found" << std::endl;
+        }
+
+    } else if (current_type == TYPE_DOUBLE) {
         int i1 = select_double_deque("Select deque to search in:");
         if (i1 == -1) return;
 
@@ -934,10 +1043,14 @@ void menu_find_sub() {
         if (i2 == -1) return;
 
         int pos = double_deques[i1]->find_sub_sequence(double_deques[i2]);
-        if (pos >= 0) std::cout << "Found at index: " << pos << std::endl;
-        else std::cout << "Not found" << std::endl;
-    }
-    else if (current_type == TYPE_STRING) {
+        if (pos >= 0) {
+            std::cout << "Found at index: " << pos << std::endl;
+        }
+        else {
+            std::cout << "Not found" << std::endl;
+        }
+
+    } else if (current_type == TYPE_STRING) {
         int i1 = select_string_deque("Select deque to search in:");
         if (i1 == -1) return;
 
@@ -947,8 +1060,8 @@ void menu_find_sub() {
         int pos = string_deques[i1]->find_sub_sequence(string_deques[i2]);
         if (pos >= 0) std::cout << "Found at index: " << pos << std::endl;
         else std::cout << "Not found" << std::endl;
-    }
-    else if (current_type == TYPE_COMPLEX) {
+
+    } else if (current_type == TYPE_COMPLEX) {
         int i1 = select_complex_deque("Select deque to search in:");
         if (i1 == -1) return;
 
@@ -956,8 +1069,11 @@ void menu_find_sub() {
         if (i2 == -1) return;
 
         int pos = complex_deques[i1]->find_sub_sequence(complex_deques[i2]);
-        if (pos >= 0) std::cout << "Found at index: " << pos << std::endl;
-        else std::cout << "Not found" << std::endl;
+        if (pos >= 0) {
+            std::cout << "Found at index: " << pos << std::endl;
+        } else {
+            std::cout << "Not found" << std::endl;
+        }
     }
 }
 
@@ -967,15 +1083,21 @@ void menu_hanoi() {
     std::cout << "\n=== Hanoi Tower ===" << std::endl;
     std::cout << "Number of rings: ";
     int n; read_int(n);
-    if (n <= 0) { std::cout << "Must be > 0" << std::endl; return; }
+    if (n <= 0) {
+        std::cout << "Must be > 0" << std::endl;
+        return;
+    }
 
     MutableSegmentedDeque<Ring> rings;
-    for (int i = 0; i < n; i++) {
-        std::cout << "Ring " << i << " size: ";
+    for (int idx = 0; idx < n; idx++) {
+        std::cout << "Ring " << idx << " size: ";
         int size; read_int(size);
         char shape[64], color[64];
-        std::cout << "Ring " << i << " shape: "; read_string(shape, 64);
-        std::cout << "Ring " << i << " color: "; read_string(color, 64);
+        std::cout << "Ring " << idx << " shape: ";
+        read_string(shape, 64);
+        std::cout << "Ring " << idx << " color: ";
+        read_string(color, 64);
+
         rings.push_back(Ring(size, shape, color));
     }
 
@@ -1006,14 +1128,18 @@ void menu_performance() {
 
     // push_back
     auto t1 = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < n; i++) deque.push_back(i);
+    for (int idx = 0; idx < n; idx++) {
+        deque.push_back(idx);
+    }
     auto t2 = std::chrono::high_resolution_clock::now();
     auto push_back_ms = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     std::cout << "push_back x" << n << ": " << push_back_ms << " us" << std::endl;
 
     // get (random access)
     t1 = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < n; i++) deque.get(i);
+    for (int idx = 0; idx < n; idx++) {
+        deque.get(idx);
+    }
     t2 = std::chrono::high_resolution_clock::now();
     auto get_ms = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     std::cout << "get x" << n << ": " << get_ms << " us" << std::endl;
@@ -1021,7 +1147,9 @@ void menu_performance() {
     // push_front
     MutableSegmentedDeque<int> deque2;
     t1 = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < n; i++) deque2.push_front(i);
+    for (int idx = 0; idx < n; idx++) {
+        deque2.push_front(idx);
+    }
     t2 = std::chrono::high_resolution_clock::now();
     auto push_front_ms = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     std::cout << "push_front x" << n << ": " << push_front_ms << " us" << std::endl;
@@ -1036,7 +1164,9 @@ void menu_performance() {
     // pop_back
     t1 = std::chrono::high_resolution_clock::now();
     int val;
-    for (int i = 0; i < n; i++) deque.pop_back(&val);
+    for (int idx = 0; idx < n; idx++) {
+        deque.pop_back(&val);
+    }
     t2 = std::chrono::high_resolution_clock::now();
     auto pop_ms = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     std::cout << "pop_back x" << n << ": " << pop_ms << " us" << std::endl;
@@ -1046,7 +1176,9 @@ void menu_performance() {
     MutableArraySequence<int> arr_seq;
 
     t1 = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < n; i++) arr_seq.prepend(i);
+    for (int idx = 0; idx < n; idx++) {
+        arr_seq.prepend(idx);
+    }
     t2 = std::chrono::high_resolution_clock::now();
     auto arr_prepend_ms = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
