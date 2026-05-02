@@ -18,7 +18,7 @@ Sequence<T>* Sequence<T>::slice(int index, int count, const Sequence<T>* replace
         count = len - index;
     }
 
-    Sequence<T>* sliced_seq = sys_empty_clone();
+    Sequence<T>* sliced_seq = CreateEmpty();
 
     // Элементы до index, и после index + count
     EnumeratorWrapper<T> iter(get_enumerator());
@@ -62,7 +62,7 @@ template <class T>
 Sequence<T>* Sequence<T>::map(T (*func)(const T& elem)) const {
     if (func == nullptr) throw std::invalid_argument("Cannot map with nullptr function");
 
-    Sequence<T>* result = sys_empty_clone();
+    Sequence<T>* result = CreateEmpty();
 
     EnumeratorWrapper<T> iter(get_enumerator());
     while (iter.move_next()) {
@@ -75,7 +75,7 @@ template <class T>
 Sequence<T>* Sequence<T>::where(bool (*predicate)(const T& elem)) const {
     if (predicate == nullptr) throw std::invalid_argument("Cannot where with nullptr predicate");
 
-    Sequence<T>* result = sys_empty_clone();
+    Sequence<T>* result = CreateEmpty();
 
     EnumeratorWrapper<T> iter(get_enumerator());
     while (iter.move_next()) {
@@ -91,7 +91,7 @@ template <class T>
 Sequence<T>* Sequence<T>::concat(const Sequence<T>* other) const {
     if (other == nullptr) throw std::invalid_argument("Cannot concat with nullptr");
 
-    Sequence<T>* result = sys_empty_clone();
+    Sequence<T>* result = CreateEmpty();
 
     EnumeratorWrapper<T> this_iter(get_enumerator());
     while (this_iter.move_next()) {
@@ -112,7 +112,7 @@ Sequence<T>* Sequence<T>::get_sub_sequence(int start, int end) const {
         throw std::out_of_range("Index out of range");
     }
 
-    Sequence<T>* result = sys_empty_clone();
+    Sequence<T>* result = CreateEmpty();
 
     int curr_index = 0;
     EnumeratorWrapper<T> iter(get_enumerator());
@@ -139,11 +139,6 @@ void ArraySequence<T>::sys_append(const T& item) {
     }
     array.set(count, item);
     count++;
-}
-
-template <class T>
-Sequence<T>* ArraySequence<T>::sys_empty_clone() const {
-    return EmptyClone();
 }
 
 template <class T>
@@ -281,11 +276,6 @@ Sequence<T>* ArraySequence<T>::insert_at(const T& item, int index) {
 template <class T>
 void ListSequence<T>::sys_append(const T& item) {
     list.append(item);
-}
-
-template <class T>
-Sequence<T>* ListSequence<T>::sys_empty_clone() const {
-    return EmptyClone();
 }
 
 template <class T>

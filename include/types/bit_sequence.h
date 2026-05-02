@@ -17,7 +17,8 @@ class BitSequence : public Sequence<Bit> {
         static int check_bytes_needed(int n); // Количество байт, необходимое для хранения n бит
     protected:
         void sys_append(const Bit& item);
-        Sequence<Bit>* sys_empty_clone() const;
+
+        Sequence<Bit>* CreateEmpty() const;
     public:
         BitSequence();
         BitSequence(const Bit* items, int count);

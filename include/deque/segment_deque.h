@@ -35,10 +35,9 @@ class SegmentedDeque: public Sequence<T> {
         void resolve_index(int index, int* block, int* offset) const; // Из index получает пару block + offset(смещение внутри block)
         
         void sys_append(const T& item) override;
-        Sequence<T>* sys_empty_clone() const override;
 
         virtual SegmentedDeque<T>* Instance() = 0;
-        virtual SegmentedDeque<T>* EmptyClone() const = 0;        
+        virtual SegmentedDeque<T>* CreateEmpty() const = 0;        
     public:
         SegmentedDeque();
         SegmentedDeque(const T* items, int count);

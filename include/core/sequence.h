@@ -9,7 +9,8 @@ template <class T>
 class Sequence {
     protected:
         virtual void sys_append(const T& item) = 0;
-        virtual Sequence<T>* sys_empty_clone() const = 0;
+
+        virtual Sequence<T>* CreateEmpty() const = 0; // Создать пустую послед-сть такого же типа
     public:
         virtual const T& get_first() const = 0; // const T& ссылка, чтобы не копировать объект, а просто const запрещает менять значение через эту ссылку
         virtual const T& get_last() const = 0;
@@ -46,10 +47,9 @@ class ArraySequence : public Sequence<T> {
         int count;
 
         void sys_append(const T& item) override;
-        Sequence<T>* sys_empty_clone() const override;
 
         virtual ArraySequence<T>* Instance() = 0;
-        virtual ArraySequence<T>* EmptyClone() const = 0;
+        virtual ArraySequence<T>* CreateEmpty() const = 0;
     public:
         ArraySequence();
         ArraySequence(const T* items, int count); // const items
@@ -85,10 +85,9 @@ class ListSequence : public Sequence<T> {
         LinkedList<T> list;
 
         void sys_append(const T& item) override;
-        Sequence<T>* sys_empty_clone() const override;
 
         virtual ListSequence<T>* Instance() = 0;
-        virtual ListSequence<T>* EmptyClone() const = 0;        
+        virtual ListSequence<T>* CreateEmpty() const = 0;        
     public:
         ListSequence();
         ListSequence(const T* items, int count);
@@ -125,7 +124,7 @@ class SequenceCRTP : public Base<T> {
             }
         }
 
-        Base<T>* EmptyClone() const override {
+        Base<T>* CreateEmpty() const override {
             return new Derived();
         }
     public:

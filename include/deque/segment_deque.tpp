@@ -178,11 +178,6 @@ void SegmentedDeque<T>::resolve_index(int index, int* block, int* offset) const 
 }
 
 template <class T>
-Sequence<T>* SegmentedDeque<T>::sys_empty_clone() const {
-    return EmptyClone();
-}
-
-template <class T>
 void SegmentedDeque<T>::sys_append(const T& item) {
     sys_push_back(item);
 }
@@ -439,7 +434,7 @@ void SegmentedDeque<T>::sort(bool (*compare)(const T& a, const T& b)) {
 
 template <class T>
 SegmentedDeque<T>* SegmentedDeque<T>::merge(const SegmentedDeque<T>* other, bool (*compare)(const T& a, const T& b)) {
-    SegmentedDeque<T>* merge_res = EmptyClone();
+    SegmentedDeque<T>* merge_res = CreateEmpty();
 
     int this_idx = 0;
     int other_idx = 0;

@@ -49,7 +49,7 @@ void BitSequence::sys_append(const Bit& item) {
     set_bit(bit_count - 1, item.get());
 }
 
-Sequence<Bit>* BitSequence::sys_empty_clone() const {
+Sequence<Bit>* BitSequence::CreateEmpty() const {
     return new BitSequence();
 }
 
