@@ -39,6 +39,10 @@ int sum(const int& a, const int& b) {
     return a + b;
 }
 
+int subtract_accumulator(const int& accumulator, const int& current) {
+    return accumulator - current;
+}
+
 bool is_zero(const int& x) {
     return x == 0;
 }
@@ -267,6 +271,14 @@ TEST(MutableArraySequenceTest, Reduce) {
 
     int reduced = arr.reduce(sum, 0);
     EXPECT_EQ(reduced, 15);
+}
+
+TEST(MutableArraySequenceTest, ReduceKeepsAccumulatorOrder) {
+    int items[] = {1, 2, 3};
+    MutableArraySequence<int> arr(items, 3);
+
+    int reduced = arr.reduce(subtract_accumulator, 10);
+    EXPECT_EQ(reduced, 4);
 }
 
 // =======================

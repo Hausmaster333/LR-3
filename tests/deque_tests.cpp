@@ -2,7 +2,9 @@
 #include "types/complex.h"
 #include "types/person_types.h"
 #include "sorting_station/sorting_station.h"
+#include "solver/solver.h"
 #include <gtest/gtest.h>
+#include <cmath>
 #include <string>
 
 int double_val(const int& x) { return x * 2; }
@@ -356,6 +358,32 @@ TEST(SegmentedDequeTest, InsertAtEnd) {
     deque.insert_at(4, 3);
     EXPECT_EQ(deque.get_count(), 4);
     EXPECT_EQ(deque.get(3), 4);
+}
+
+TEST(SegmentedDequeTest, InsertAtEmpty) {
+    MutableSegmentedDeque<int> deque;
+
+    deque.insert_at(42, 0);
+
+    EXPECT_EQ(deque.get_count(), 1);
+    EXPECT_EQ(deque.get(0), 42);
+}
+
+TEST(SegmentedDequeTest, ImmutableInsertAtReturnsNew) {
+    int items[] = {1, 3};
+    ImmutableSegmentedDeque<int> deque(items, 2);
+
+    Sequence<int>* result = deque.insert_at(2, 1);
+
+    EXPECT_EQ(deque.get_count(), 2);
+    EXPECT_EQ(result->get_count(), 3);
+
+    SegmentedDeque<int>* result_deque = dynamic_cast<SegmentedDeque<int>*>(result);
+    EXPECT_EQ(result_deque->get(0), 1);
+    EXPECT_EQ(result_deque->get(1), 2);
+    EXPECT_EQ(result_deque->get(2), 3);
+
+    delete result;
 }
 
 // =================== concat
@@ -1130,4 +1158,92 @@ TEST(SortingStationTest, EmptyTrain) {
 
     EXPECT_EQ(result.get_count(), 0);
     EXPECT_EQ(count_wagon_types(train), 0);
+}
+
+// =================== Solver
+
+void expect_demo_solution(const Vector& solution) {
+    ASSERT_EQ(solution.get_size(), 3);
+    EXPECT_NEAR(solution.get(0), 1.0, 1e-8);
+    EXPECT_NEAR(solution.get(1), -2.0, 1e-8);
+    EXPECT_NEAR(solution.get(2), -2.0, 1e-8);
+}
+
+TEST(SolverTest, GaussSolvesDemoSystem) {
+    double matrix_items[] = {
+        3.0, 2.0, -1.0,
+        2.0, -2.0, 4.0,
+        -1.0, 0.5, -1.0
+    };
+    double rhs_items[] = {1.0, -2.0, 0.0};
+
+    Matrix matrix(matrix_items, 3, 3);
+    Vector rhs(rhs_items, 3);
+
+    Vector basic = Solver::solve_gauss_basic(matrix, rhs);
+    Vector pivot = Solver::solve_gauss_partial_pivot(matrix, rhs);
+
+    expect_demo_solution(basic);
+    expect_demo_solution(pivot);
+}
+
+TEST(SolverTest, PartialPivotSolvesZeroPivotSystem) {
+    double matrix_items[] = {
+        0.0, 1.0,
+        1.0, 1.0
+    };
+    double rhs_items[] = {1.0, 2.0};
+
+    Matrix matrix(matrix_items, 2, 2);
+    Vector rhs(rhs_items, 2);
+
+    EXPECT_THROW(Solver::solve_gauss_basic(matrix, rhs), std::runtime_error);
+
+    Vector solution = Solver::solve_gauss_partial_pivot(matrix, rhs);
+    EXPECT_NEAR(solution.get(0), 1.0, 1e-8);
+    EXPECT_NEAR(solution.get(1), 1.0, 1e-8);
+}
+
+TEST(SolverTest, CollectStepsContainsSwapInPivotMode) {
+    double matrix_items[] = {
+        0.0, 1.0,
+        1.0, 1.0
+    };
+    double rhs_items[] = {1.0, 2.0};
+
+    Matrix matrix(matrix_items, 2, 2);
+    Vector rhs(rhs_items, 2);
+
+    MutableSegmentedDeque<GaussStep> steps = Solver::collect_gauss_steps(matrix, rhs, GaussMode::PartialPivot);
+    bool has_swap = false;
+
+    for (int index = 0; index < steps.get_count(); index++) {
+        if (steps.get(index).type == GaussStepType::SwapRows) {
+            has_swap = true;
+        }
+    }
+
+    EXPECT_TRUE(has_swap);
+    EXPECT_TRUE(steps.get_last().type == GaussStepType::Finished);
+}
+
+TEST(SolverTest, StepsFinishWithSameSolutionAsSolver) {
+    double matrix_items[] = {
+        3.0, 2.0, -1.0,
+        2.0, -2.0, 4.0,
+        -1.0, 0.5, -1.0
+    };
+    double rhs_items[] = {1.0, -2.0, 0.0};
+
+    Matrix matrix(matrix_items, 3, 3);
+    Vector rhs(rhs_items, 3);
+
+    Vector solution = Solver::solve_gauss_partial_pivot(matrix, rhs);
+    MutableSegmentedDeque<GaussStep> steps = Solver::collect_gauss_steps(matrix, rhs, GaussMode::PartialPivot);
+
+    ASSERT_GT(steps.get_count(), 0);
+    EXPECT_TRUE(steps.get_last().type == GaussStepType::Finished);
+    EXPECT_NEAR(steps.get_last().solution.get(0), solution.get(0), 1e-8);
+    EXPECT_NEAR(steps.get_last().solution.get(1), solution.get(1), 1e-8);
+    EXPECT_NEAR(steps.get_last().solution.get(2), solution.get(2), 1e-8);
 }

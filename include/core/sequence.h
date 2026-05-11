@@ -181,6 +181,12 @@ template <class T>
 class MutableArraySequence : public SequenceCRTP<T, MutableArraySequence<T>, true, ArraySequence> {
     public:
         using SequenceCRTP<T, MutableArraySequence<T>, true, ArraySequence>::SequenceCRTP;
+
+        void set(int index, const T& item) {
+            if (index < 0 || index >= this->count) throw std::out_of_range("Index out of range");
+
+            this->array.set(index, item);
+        }
 };
 
 template <class T>

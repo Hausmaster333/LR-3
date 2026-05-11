@@ -381,19 +381,26 @@ Sequence<T>* SegmentedDeque<T>::insert_at(const T& item, int target_index) {
 
     if (target_index < 0 || target_index > inst->count) throw std::out_of_range("Index out of range");
 
-    inst->push_back(get(count - 1)); // Добавляем пустой элемент в конец через T() либо копируем последний, для своих классов нужен конструктор по умолчанию
+    int old_count = inst->count;
+
+    if (target_index == old_count) {
+        inst->sys_push_back(item);
+        return inst;
+    }
+
+    inst->sys_push_back(inst->get(old_count - 1)); // Добавляем копию последнего элемента в конец
 
     int curr_block_index, offset;
-    resolve_index(target_index, &curr_block_index, &offset);
+    inst->resolve_index(target_index, &curr_block_index, &offset);
     
     T* curr_block = inst->block_map.get(curr_block_index);
 
-    for (int index = count - 1; index > target_index; index--) {
+    for (int index = old_count - 1; index > target_index; index--) {
         int write_block, write_offset; // Куда пишем
-        resolve_index(index, &write_block, &write_offset);
+        inst->resolve_index(index, &write_block, &write_offset);
 
         int read_block, read_offset; // Откуда пишем
-        resolve_index(index - 1, &read_block, &read_offset);
+        inst->resolve_index(index - 1, &read_block, &read_offset);
 
         T* curr_write_block = inst->block_map.get(write_block);
         T* curr_read_block = inst->block_map.get(read_block);

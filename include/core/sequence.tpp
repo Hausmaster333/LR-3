@@ -52,7 +52,7 @@ T Sequence<T>::reduce(T (*func)(const T& accumulator, const T& current), const T
     EnumeratorWrapper<T> iter(get_enumerator());
     while (iter.move_next()) {
         T current_elem = iter.get_current();
-        reduced_elem = func(current_elem, reduced_elem);
+        reduced_elem = func(reduced_elem, current_elem);
     }
 
     return reduced_elem;

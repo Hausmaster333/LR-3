@@ -5,9 +5,11 @@
 #include "deque/segment_deque.h"
 #include "sorting_station/sorting_station.h"
 #include "hanoi/hanoi.h"
+#include "solver/solver.h"
 #include "gui/deque_visualizer.h"
 #include "gui/benchmarks.h"
 #include <GLFW/glfw3.h>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -58,6 +60,25 @@ bool sort_greater(const int& a, const int& b) { return a > b; }
 int (*g_map_handlers[])(const int&) = {map_double, map_square, map_negative};
 bool (*g_where_handlers[])(const int&) = {where_positive, where_even, where_less_10};
 bool (*g_sort_handlers[])(const int&, const int&) = {sort_less, sort_greater};
+
+static const int g_solver_max_size = 6;
+static int g_solver_size = 3;
+static double g_solver_matrix_values[g_solver_max_size][g_solver_max_size] = {
+    {3.0, 2.0, -1.0, 0.0, 0.0, 0.0},
+    {2.0, -2.0, 4.0, 0.0, 0.0, 0.0},
+    {-1.0, 0.5, -1.0, 0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+};
+static double g_solver_rhs_values[g_solver_max_size] = {1.0, -2.0, 0.0, 0.0, 0.0, 0.0};
+static int g_solver_mode = 1;
+static const char* g_solver_modes[] = {"Basic", "Partial Pivot"};
+static MutableSegmentedDeque<GaussStep> g_solver_steps;
+static int g_solver_current_step = -1;
+static bool g_solver_auto_play = false;
+static double g_solver_last_step_time = 0;
+static float g_solver_speed = 0.7f;
 
 MutableSegmentedDeque<Wagon> g_station_train;            // Исходный поезд
 MutableSegmentedDeque<StationStep> g_station_steps;      // Последовательность шагов
@@ -679,11 +700,354 @@ void draw_hanoi_window() {
     ImGui::End();
 }
 
+Matrix solver_make_matrix_from_input() {
+    Matrix matrix(g_solver_size, g_solver_size);
+
+    for (int row = 0; row < g_solver_size; row++) {
+        for (int col = 0; col < g_solver_size; col++) {
+            matrix.set(row, col, g_solver_matrix_values[row][col]);
+        }
+    }
+
+    return matrix;
+}
+
+Vector solver_make_rhs_from_input() {
+    Vector rhs(g_solver_size);
+
+    for (int row = 0; row < g_solver_size; row++) {
+        rhs.set(row, g_solver_rhs_values[row]);
+    }
+
+    return rhs;
+}
+
+void solver_load_demo() {
+    g_solver_size = 3;
+
+    double demo_matrix[3][3] = {
+        {3.0, 2.0, -1.0},
+        {2.0, -2.0, 4.0},
+        {-1.0, 0.5, -1.0}
+    };
+    double demo_rhs[3] = {1.0, -2.0, 0.0};
+
+    for (int row = 0; row < g_solver_max_size; row++) {
+        for (int col = 0; col < g_solver_max_size; col++) {
+            g_solver_matrix_values[row][col] = 0.0;
+        }
+        g_solver_rhs_values[row] = 0.0;
+    }
+
+    for (int row = 0; row < g_solver_size; row++) {
+        for (int col = 0; col < g_solver_size; col++) {
+            g_solver_matrix_values[row][col] = demo_matrix[row][col];
+        }
+        g_solver_rhs_values[row] = demo_rhs[row];
+    }
+}
+
+void solver_build_steps() {
+    Matrix matrix = solver_make_matrix_from_input();
+    Vector rhs = solver_make_rhs_from_input();
+    GaussMode mode = (g_solver_mode == 0) ? GaussMode::Basic : GaussMode::PartialPivot;
+
+    g_solver_steps = Solver::collect_gauss_steps(matrix, rhs, mode);
+    g_solver_current_step = (g_solver_steps.get_count() > 0) ? 0 : -1;
+    g_solver_auto_play = false;
+}
+
+void solver_next_step() {
+    if (g_solver_current_step >= g_solver_steps.get_count() - 1) return;
+
+    g_solver_current_step++;
+}
+
+void solver_prev_step() {
+    if (g_solver_current_step <= 0) return;
+
+    g_solver_current_step--;
+}
+
+void solver_reset_steps() {
+    g_solver_current_step = (g_solver_steps.get_count() > 0) ? 0 : -1;
+    g_solver_auto_play = false;
+}
+
+void solver_update_auto_play() {
+    if (!g_solver_auto_play) return;
+
+    double now = ImGui::GetTime();
+    if (now - g_solver_last_step_time >= g_solver_speed) {
+        if (g_solver_current_step >= g_solver_steps.get_count() - 1) {
+            g_solver_auto_play = false;
+        } else {
+            solver_next_step();
+            g_solver_last_step_time = now;
+        }
+    }
+}
+
+void draw_solver_bracket(ImDrawList* draw, ImVec2 min_pos, ImVec2 max_pos, bool left) {
+    float x = left ? min_pos.x : max_pos.x;
+    float dir = left ? 1.0f : -1.0f;
+    float tick = 10.0f;
+    ImU32 color = IM_COL32(220, 220, 230, 230);
+
+    draw->AddLine(ImVec2(x, min_pos.y), ImVec2(x, max_pos.y), color, 2.0f);
+    draw->AddLine(ImVec2(x, min_pos.y), ImVec2(x + dir * tick, min_pos.y), color, 2.0f);
+    draw->AddLine(ImVec2(x, max_pos.y), ImVec2(x + dir * tick, max_pos.y), color, 2.0f);
+}
+
+void format_solver_number(double value, char* buffer, int buffer_size) {
+    if (std::fabs(value) < 1e-9) {
+        value = 0.0;
+    }
+
+    std::snprintf(buffer, buffer_size, "%.4f", value);
+
+    int len = (int)std::strlen(buffer);
+    while (len > 0 && buffer[len - 1] == '0') {
+        buffer[len - 1] = '\0';
+        len--;
+    }
+
+    if (len > 0 && buffer[len - 1] == '.') {
+        buffer[len - 1] = '\0';
+    }
+}
+
+void format_solver_description(const GaussStep& step, char* buffer, int buffer_size) {
+    if (step.type == GaussStepType::EliminateRow) {
+        char factor_text[32];
+        format_solver_number(step.factor, factor_text, sizeof(factor_text));
+        std::snprintf(buffer, buffer_size, "R%d = R%d - %s * R%d",
+                      step.target_row, step.target_row, factor_text, step.pivot_row);
+        return;
+    }
+
+    if (step.type == GaussStepType::BackSubstitution && step.target_row >= 0) {
+        char value_text[32];
+        format_solver_number(step.solution.get(step.target_row), value_text, sizeof(value_text));
+        std::snprintf(buffer, buffer_size, "x%d = %s", step.target_row, value_text);
+        return;
+    }
+
+    std::strncpy(buffer, step.description, buffer_size - 1);
+    buffer[buffer_size - 1] = '\0';
+}
+
+void draw_solver_input_table() {
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+
+    ImGui::Text("A =");
+    ImGui::SameLine();
+
+    ImGui::BeginGroup();
+    ImGui::Dummy(ImVec2(12.0f, 0.0f));
+    ImGui::SameLine(0.0f, 0.0f);
+
+    ImGui::BeginGroup();
+    for (int row = 0; row < g_solver_size; row++) {
+        for (int col = 0; col < g_solver_size; col++) {
+            if (col > 0) ImGui::SameLine(0.0f, 6.0f);
+
+            char label[32];
+            snprintf(label, sizeof(label), "##a_%d_%d", row, col);
+            ImGui::SetNextItemWidth(78.0f);
+            ImGui::InputDouble(label, &g_solver_matrix_values[row][col], 0.0, 0.0, "%.4f");
+        }
+
+        if (row + 1 < g_solver_size) {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+        }
+    }
+    ImGui::EndGroup();
+
+    ImVec2 matrix_min = ImGui::GetItemRectMin();
+    ImVec2 matrix_max = ImGui::GetItemRectMax();
+    draw_solver_bracket(draw, ImVec2(matrix_min.x - 12.0f, matrix_min.y - 4.0f), ImVec2(matrix_max.x + 12.0f, matrix_max.y + 4.0f), true);
+    draw_solver_bracket(draw, ImVec2(matrix_min.x - 12.0f, matrix_min.y - 4.0f), ImVec2(matrix_max.x + 12.0f, matrix_max.y + 4.0f), false);
+    ImGui::EndGroup();
+
+    ImGui::SameLine(0.0f, 24.0f);
+    ImGui::Text("b =");
+    ImGui::SameLine();
+
+    ImGui::BeginGroup();
+    ImGui::Dummy(ImVec2(12.0f, 0.0f));
+    ImGui::SameLine(0.0f, 0.0f);
+
+    ImGui::BeginGroup();
+    for (int row = 0; row < g_solver_size; row++) {
+        char rhs_label[32];
+        snprintf(rhs_label, sizeof(rhs_label), "##b_%d", row);
+        ImGui::SetNextItemWidth(78.0f);
+        ImGui::InputDouble(rhs_label, &g_solver_rhs_values[row], 0.0, 0.0, "%.4f");
+
+        if (row + 1 < g_solver_size) {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+        }
+    }
+    ImGui::EndGroup();
+
+    ImVec2 vector_min = ImGui::GetItemRectMin();
+    ImVec2 vector_max = ImGui::GetItemRectMax();
+    draw_solver_bracket(draw, ImVec2(vector_min.x - 12.0f, vector_min.y - 4.0f), ImVec2(vector_max.x + 12.0f, vector_max.y + 4.0f), true);
+    draw_solver_bracket(draw, ImVec2(vector_min.x - 12.0f, vector_min.y - 4.0f), ImVec2(vector_max.x + 12.0f, vector_max.y + 4.0f), false);
+    ImGui::EndGroup();
+}
+
+void draw_solver_augmented_matrix(const GaussStep& step) {
+    if (step.augmented.get_rows() == 0 || step.augmented.get_cols() == 0) {
+        ImGui::Text("No matrix snapshot");
+        return;
+    }
+
+    int rows = step.augmented.get_rows();
+    int cols = step.augmented.get_cols();
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    ImVec2 origin = ImGui::GetCursorScreenPos();
+
+    float label_width = 28.0f;
+    float bracket_width = 16.0f;
+    float cell_width = 86.0f;
+    float cell_height = 34.0f;
+    float gap_x = 8.0f;
+    float gap_y = 8.0f;
+    float matrix_x = origin.x + label_width + bracket_width;
+    float matrix_y = origin.y;
+    float matrix_width = cols * cell_width + (cols - 1) * gap_x;
+    float matrix_height = rows * cell_height + (rows - 1) * gap_y;
+    float b_divider_x = matrix_x + (cols - 1) * (cell_width + gap_x) - gap_x * 0.5f;
+
+    for (int row = 0; row < rows; row++) {
+        char row_label[16];
+        snprintf(row_label, sizeof(row_label), "R%d", row);
+        ImVec2 label_pos(origin.x, matrix_y + row * (cell_height + gap_y) + 8.0f);
+        draw->AddText(label_pos, IM_COL32(160, 165, 175, 255), row_label);
+
+        for (int col = 0; col < cols; col++) {
+            float x = matrix_x + col * (cell_width + gap_x);
+            float y = matrix_y + row * (cell_height + gap_y);
+            ImVec2 p1(x, y);
+            ImVec2 p2(x + cell_width, y + cell_height);
+
+            bool is_pivot_cell = (row == step.pivot_row && col == step.pivot_col);
+            bool is_pivot_row = (row == step.pivot_row);
+            bool is_target_row = (row == step.target_row);
+
+            if (is_pivot_cell) {
+                draw->AddRectFilled(p1, p2, IM_COL32(230, 126, 34, 185), 5.0f);
+            } else if (is_target_row) {
+                draw->AddRectFilled(p1, p2, IM_COL32(52, 152, 219, 120), 5.0f);
+            } else if (is_pivot_row) {
+                draw->AddRectFilled(p1, p2, IM_COL32(46, 204, 113, 85), 5.0f);
+            }
+
+            char value_text[32];
+            format_solver_number(step.augmented.get(row, col), value_text, sizeof(value_text));
+            ImVec2 text_size = ImGui::CalcTextSize(value_text);
+            ImVec2 text_pos(x + (cell_width - text_size.x) * 0.5f,
+                            y + (cell_height - text_size.y) * 0.5f);
+            draw->AddText(text_pos, IM_COL32(245, 245, 248, 255), value_text);
+        }
+    }
+
+    ImVec2 bracket_min(matrix_x - bracket_width, matrix_y - 8.0f);
+    ImVec2 bracket_max(matrix_x + matrix_width + bracket_width, matrix_y + matrix_height + 8.0f);
+    draw_solver_bracket(draw, bracket_min, bracket_max, true);
+    draw_solver_bracket(draw, bracket_min, bracket_max, false);
+
+    draw->AddLine(ImVec2(b_divider_x, matrix_y - 4.0f),
+                  ImVec2(b_divider_x, matrix_y + matrix_height + 4.0f),
+                  IM_COL32(220, 220, 230, 190), 2.0f);
+
+    ImGui::Dummy(ImVec2(label_width + bracket_width * 2.0f + matrix_width,
+                        matrix_height + 16.0f));
+}
+
+void draw_solver_solution(const GaussStep& step) {
+    if (step.solution.get_size() == 0) return;
+
+    ImGui::Text("Solution:");
+    for (int index = 0; index < step.solution.get_size(); index++) {
+        ImGui::SameLine();
+        if (step.solution_count == step.solution.get_size() || index >= step.solution.get_size() - step.solution_count) {
+            char value_text[32];
+            format_solver_number(step.solution.get(index), value_text, sizeof(value_text));
+            ImGui::Text("x%d=%s", index, value_text);
+        } else {
+            ImGui::Text("x%d=-", index);
+        }
+    }
+}
+
+void draw_gaussian_solver_window() {
+    ImGui::Begin("Gaussian Solver");
+
+    ImGui::SliderInt("Size", &g_solver_size, 2, g_solver_max_size);
+    ImGui::Combo("Mode", &g_solver_mode, g_solver_modes, 2);
+
+    if (ImGui::Button("Load Demo")) {
+        solver_load_demo();
+        g_solver_steps = MutableSegmentedDeque<GaussStep>();
+        g_solver_current_step = -1;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Build Steps")) {
+        solver_build_steps();
+    }
+
+    ImGui::Separator();
+    draw_solver_input_table();
+
+    ImGui::Separator();
+
+    ImGui::BeginDisabled(g_solver_steps.get_count() == 0);
+    if (ImGui::Button("< Prev")) solver_prev_step();
+    ImGui::SameLine();
+    if (ImGui::Button("Next >")) solver_next_step();
+    ImGui::SameLine();
+    if (ImGui::Button(g_solver_auto_play ? "Pause" : "Auto Play")) {
+        g_solver_auto_play = !g_solver_auto_play;
+        g_solver_last_step_time = ImGui::GetTime();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset Steps")) solver_reset_steps();
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::SliderFloat("Speed (sec)", &g_solver_speed, 0.1f, 2.0f);
+
+    solver_update_auto_play();
+
+    if (g_solver_current_step >= 0 && g_solver_current_step < g_solver_steps.get_count()) {
+        const GaussStep& step = g_solver_steps.get(g_solver_current_step);
+
+        ImGui::Text("Step %d / %d", g_solver_current_step + 1, g_solver_steps.get_count());
+        if (step.type == GaussStepType::Error) {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "%s", step.description);
+        } else {
+            char description[128];
+            format_solver_description(step, description, sizeof(description));
+            ImGui::TextWrapped("%s", description);
+        }
+
+        draw_solver_augmented_matrix(step);
+        draw_solver_solution(step);
+    } else {
+        ImGui::Text("Build steps to start animation");
+    }
+
+    ImGui::End();
+}
+
 void draw_gui() {
     draw_deque_window();
     draw_benchmarks_window();
     draw_sorting_station_window();
     draw_hanoi_window();
+    draw_gaussian_solver_window();
 }
 
 int main() {
