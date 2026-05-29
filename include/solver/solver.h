@@ -39,10 +39,7 @@ class Solver {
         Solver();
 
         static Matrix make_augmented(const Matrix& matrix, const Vector& rhs);
-        static Vector run_gauss(const Matrix& matrix,
-                                const Vector& rhs,
-                                GaussMode mode,
-                                MutableSegmentedDeque<GaussStep>* steps);
+        static Vector run_gauss(const Matrix& matrix, const Vector& rhs, GaussMode mode, MutableSegmentedDeque<GaussStep>* steps);
 
         static void append_step(MutableSegmentedDeque<GaussStep>* steps,
                                 GaussStepType type,
@@ -60,9 +57,7 @@ class Solver {
 
         static Vector solve_gauss_basic(const Matrix& matrix, const Vector& rhs);
         static Vector solve_gauss_partial_pivot(const Matrix& matrix, const Vector& rhs);
-        static MutableSegmentedDeque<GaussStep> collect_gauss_steps(const Matrix& matrix,
-                                                                    const Vector& rhs,
-                                                                    GaussMode mode);
+        static MutableSegmentedDeque<GaussStep> collect_gauss_steps(const Matrix& matrix, const Vector& rhs, GaussMode mode);
 };
 
 #endif
