@@ -12,7 +12,7 @@ MutableArraySequence<uint8_t>* make_bytes(const char* str) {
     return seq;
 }
 
-bool sequences_equal(const MutableArraySequence<uint8_t>* a, const MutableArraySequence<uint8_t>* b) {
+bool sequences_equal(const MutableArraySequence<uint8_t>* a, const MutableArraySequence<uint8_t>* b) { // Сравнивает две последовательности байтов 
     if (a->get_count() != b->get_count()) return false;
 
     for (int idx = 0; idx < a->get_count(); idx++) {
@@ -22,7 +22,7 @@ bool sequences_equal(const MutableArraySequence<uint8_t>* a, const MutableArrayS
     return true;
 }
 
-void expect_codes_equal(const MutableArraySequence<uint16_t>* actual, const uint16_t* expected, int count) {
+void expect_codes_equal(const MutableArraySequence<uint16_t>* actual, const uint16_t* expected, int count) { // Сравнивает результат сжатия с заранее ожидаемыми LZW-кодами
     ASSERT_EQ(actual->get_count(), count);
 
     for (int idx = 0; idx < count; idx++) {

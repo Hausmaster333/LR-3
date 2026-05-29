@@ -43,5 +43,8 @@ deq_tests: tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/
 deq_tests_leak: tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
 	$(CC) $(CFLAGS) -g -O0 $(GTEST_FLAGS) tests/deque_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc -o deq_tests_leak
 #valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./deq_tests_leak
+lzw_tests: tests/lzw_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
+	$(CC) $(CFLAGS) $(GTEST_FLAGS) tests/lzw_tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc -o lzw_tests
+
 clean:
 	rm *.o program seq_tests 
